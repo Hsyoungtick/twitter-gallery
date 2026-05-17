@@ -16,6 +16,11 @@ const NITTER_URL = process.env.NITTER_URL || 'http://127.0.0.1:8080'
 app.use(cors())
 app.use(express.json())
 
+function stripImageParams(url) {
+  if (!url) return url
+  return url.replace(/(\.(jpg|jpeg|png|gif|webp|bmp|svg))\?[^/]+$/i, '$1')
+}
+
 app.use('/video', async (req, res) => {
   try {
     const targetUrl = `${NITTER_URL}/video${req.url}`
@@ -207,7 +212,7 @@ app.get('/api/user/:username', async (req, res) => {
     const response = await axios.get(`${NITTER_URL}/${username}`, { timeout: 10000 })
     const $ = cheerio.load(response.data)
     
-    const avatarSrc = $('.profile-card-avatar img').attr('src') || ''
+    const avatarSrc = stripImageParams($('.profile-card-avatar img').attr('src') || '')
     let tweetsCount = $('.profile-statlist .tweets .profile-stat-num').text().trim()
     if (!tweetsCount || tweetsCount === '0') {
       tweetsCount = $('.profile-statlist li:first-child .profile-stat-num').text().trim() ||
@@ -275,13 +280,13 @@ app.get('/api/user/:username/media', async (req, res) => {
           }
           
           let poster = videoEl.attr('poster') || ''
-          previewUrl = poster
+          previewUrl = stripImageParams(poster)
           
           duration = $parent.find('.overlay-duration').text().trim()
         } else {
           let imgSrc = $media.find('a img').attr('src') || $media.find('img').attr('src') || ''
-          mediaUrl = imgSrc
-          previewUrl = imgSrc
+          mediaUrl = stripImageParams(imgSrc)
+          previewUrl = mediaUrl
         }
         
         if (mediaUrl) {
@@ -683,21 +688,21 @@ function parseMediaPage($, username) {
         const videoEl = $media.find('video')
         const dataUrl = videoEl.attr('data-url') || ''
         if (dataUrl) mediaUrl = dataUrl
-        previewUrl = videoEl.attr('poster') || ''
+        previewUrl = stripImageParams(videoEl.attr('poster') || '')
         duration = $parent.find('.overlay-duration').text().trim()
       } else {
-        mediaUrl = $media.find('a img').attr('src') || $media.find('img').attr('src') || ''
-        previewUrl = mediaUrl
-      }
-      
-      if (mediaUrl) {
-        mediaItems.push({
-          id: `${tweetId}-${i}`,
-          tweetId,
-          tweetUrl: tweetLink ? `${NITTER_URL}${tweetLink}` : '',
-          type,
-          url: mediaUrl,
-          previewUrl,
+          mediaUrl = stripImageParams($media.find('a img').attr('src') || $media.find('img').attr('src') || '')
+          previewUrl = mediaUrl
+        }
+        
+        if (mediaUrl) {
+          mediaItems.push({
+            id: `${tweetId}-${i}`,
+            tweetId,
+            tweetUrl: tweetLink ? `${NITTER_URL}${tweetLink}` : '',
+            type,
+            url: mediaUrl,
+            previewUrl: stripImageParams(previewUrl),
           text: tweetText,
           date: tweetDate,
           likes,
@@ -718,7 +723,7 @@ function parseMediaPage($, username) {
 
 // ========== 辅助函数：解析nitter用户页面 ==========
 function parseUserPage($, username) {
-  const avatarSrc = $('.profile-card-avatar img').attr('src') || ''
+  const avatarSrc = stripImageParams($('.profile-card-avatar img').attr('src') || '')
   let tweetsCount = $('.profile-statlist .tweets .profile-stat-num').text().trim()
   if (!tweetsCount || tweetsCount === '0') {
     tweetsCount = $('.profile-statlist li:first-child .profile-stat-num').text().trim() ||

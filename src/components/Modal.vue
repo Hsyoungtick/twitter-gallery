@@ -28,16 +28,24 @@
         
         <div 
           class="flex-1 flex items-center justify-center p-2 min-w-0 overflow-hidden"
-          @click.self="$emit('close')"
+          @click.self="imgFullscreen ? (imgFullscreen = false) : $emit('close')"
+          @mousemove="onImgMouseMove"
+          @mouseup="onImgMouseUp"
+          @mouseleave="onImgMouseUp"
         >
           <div class="w-[95%] h-[95vh] max-h-[95vh] flex items-center justify-center">
-            <div v-if="media" class="w-full h-full flex items-center justify-center" @click.self="$emit('close')">
+            <div v-if="media" class="w-full h-full flex items-center justify-center" @click.self="imgFullscreen ? (imgFullscreen = false) : $emit('close')">
               <img
                 v-if="media.type === 'photo'"
                 :src="media.url"
                 :alt="media.text"
-                class="max-w-full max-h-full object-contain rounded-lg cursor-pointer"
-                @click.stop
+                ref="imgRef"
+                class="max-w-full max-h-full object-contain rounded-lg cursor-zoom-in"
+                :class="{ 'cursor-zoom-out': imgFullscreen && imgScale <= 1, 'cursor-grab': imgFullscreen && imgScale > 1 }"
+                :style="imgStyle"
+                @click.stop="toggleFullscreen"
+                @wheel.prevent="onImgWheel"
+                @mousedown.prevent="onImgMouseDown"
               />
               
               <div v-else class="relative w-full h-full flex items-center justify-center" @click.self="$emit('close')">
@@ -72,7 +80,7 @@
         </div>
       </div>
       
-        <div v-if="media" class="w-[420px] bg-white dark:bg-zinc-900 flex flex-col h-full overflow-y-auto">
+        <div v-if="media && !imgFullscreen" class="w-[420px] bg-white dark:bg-zinc-900 flex flex-col h-full overflow-y-auto">
           <div v-if="authorInfo" class="tweet-header p-4 border-b dark:border-zinc-700">
             <div class="flex items-start">
               <a :href="`https://x.com/${authorInfo.username}`" target="_blank" class="tweet-avatar flex-shrink-0 mr-3 hover:opacity-80 transition-opacity">
@@ -277,6 +285,75 @@ const modalOverlay = ref(null)
 const usernameCache = ref({})
 let hlsInstance = null
 
+const imgRef = ref(null)
+const imgScale = ref(1)
+const imgFullscreen = ref(false)
+const imgOffsetX = ref(0)
+const imgOffsetY = ref(0)
+let isDragging = false
+let dragStartX = 0
+let dragStartY = 0
+let dragOffsetX = 0
+let dragOffsetY = 0
+
+const imgStyle = computed(() => {
+  if (!imgFullscreen.value) return {}
+  return {
+    transform: `scale(${imgScale.value}) translate(${imgOffsetX.value}px, ${imgOffsetY.value}px)`,
+    transformOrigin: 'center center',
+    transition: isDragging ? 'none' : 'transform 0.15s ease',
+    maxWidth: '100vw',
+    maxHeight: '100vh',
+    cursor: imgScale.value > 1 ? 'grab' : 'zoom-out',
+  }
+})
+
+const toggleFullscreen = () => {
+  if (!imgFullscreen.value) {
+    imgFullscreen.value = true
+    imgScale.value = 1
+    imgOffsetX.value = 0
+    imgOffsetY.value = 0
+  } else {
+    if (imgScale.value > 1) {
+      imgScale.value = 1
+      imgOffsetX.value = 0
+      imgOffsetY.value = 0
+    } else {
+      imgFullscreen.value = false
+    }
+  }
+}
+
+const onImgWheel = (e) => {
+  if (!imgFullscreen.value) return
+  const delta = e.deltaY > 0 ? -0.15 : 0.15
+  imgScale.value = Math.max(0.5, Math.min(10, imgScale.value + delta))
+  if (imgScale.value <= 1) {
+    imgOffsetX.value = 0
+    imgOffsetY.value = 0
+  }
+}
+
+const onImgMouseDown = (e) => {
+  if (!imgFullscreen.value || imgScale.value <= 1) return
+  isDragging = true
+  dragStartX = e.clientX
+  dragStartY = e.clientY
+  dragOffsetX = imgOffsetX.value
+  dragOffsetY = imgOffsetY.value
+}
+
+const onImgMouseMove = (e) => {
+  if (!isDragging) return
+  imgOffsetX.value = dragOffsetX + (e.clientX - dragStartX) / imgScale.value
+  imgOffsetY.value = dragOffsetY + (e.clientY - dragStartY) / imgScale.value
+}
+
+const onImgMouseUp = () => {
+  isDragging = false
+}
+
 const xUrl = computed(() => {
   if (!props.media?.tweetId || !props.media?.author) return '#'
   return `https://x.com/${props.media.author}/status/${props.media.tweetId}`
@@ -415,7 +492,11 @@ const initVideo = () => {
     
     hlsInstance = new Hls({
       enableWorker: true,
-      lowLatencyMode: true,
+      lowLatencyMode: false,
+      startLevel: -1,
+      capLevelToPlayerSize: false,
+      maxBufferLength: 30,
+      maxMaxBufferLength: 60,
       xhrSetup: (xhr) => {
         xhr.withCredentials = false
       }
@@ -424,7 +505,11 @@ const initVideo = () => {
     hlsInstance.loadSource(videoUrl)
     hlsInstance.attachMedia(videoRef.value)
     
-    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+      if (data.levels.length > 0) {
+        const maxLevel = data.levels.length - 1
+        hlsInstance.currentLevel = maxLevel
+      }
       videoRef.value.play().catch(() => {})
     })
     
@@ -444,6 +529,10 @@ const initVideo = () => {
 }
 
 watch(() => props.media, async () => {
+  imgFullscreen.value = false
+  imgScale.value = 1
+  imgOffsetX.value = 0
+  imgOffsetY.value = 0
   if (props.media && props.media.type === 'video') {
     setTimeout(initVideo, 100)
   }

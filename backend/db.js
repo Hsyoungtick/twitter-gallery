@@ -91,7 +91,7 @@ export async function initDB() {
     console.log('[db] 迁移跳过:', e.message)
   }
 
-  // 迁移：从following表同步数据到users表
+  // 迁移：从following表同步数据到users表，然后删除following表
   try {
     const followingExists = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='following'")
     if (followingExists.length > 0) {
@@ -108,7 +108,8 @@ export async function initDB() {
         existing.free()
       }
       followingRows.free()
-      console.log('[db] 迁移: following表数据已同步到users表')
+      db.run('DROP TABLE following')
+      console.log('[db] 迁移: following表数据已同步到users表，following表已删除')
     }
   } catch (e) {
     console.log('[db] following迁移跳过:', e.message)
