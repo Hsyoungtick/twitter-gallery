@@ -1,0 +1,84 @@
+{
+  "header": {
+    "refreshing": "刷新中...",
+    "refresh": "刷新",
+    "followingList": "关注列表",
+    "filter": "筛选: @{user} (点击取消)"
+  },
+  "addUser": {
+    "title": "添加关注用户",
+    "username": "用户名",
+    "enterUsername": "输入 Twitter 用户名",
+    "noAtSymbol": "不需要 @ 符号",
+    "cancel": "取消",
+    "add": "添加",
+    "pleaseEnterUsername": "请输入用户名"
+  },
+  "followingList": {
+    "title": "关注列表",
+    "addUser": "添加用户",
+    "refresh": "刷新",
+    "delete": "删除"
+  },
+  "followingModal": {
+    "title": "关注列表 ({count})",
+    "addUser": "添加用户",
+    "searchUsername": "搜索用户名...",
+    "sortLatest": "最近更新",
+    "sortName": "名称",
+    "sortMediaCount": "媒体数",
+    "noMatchingUser": "未找到匹配用户",
+    "noFollowingUser": "暂无关注用户",
+    "followers": "粉丝",
+    "media": "媒体",
+    "viewOnX": "在X上查看",
+    "deleteUser": "删除用户"
+  },
+  "importFollowing": {
+    "title": "批量导入关注",
+    "hint": "粘贴关注页面的HTML内容，自动提取其中的@用户名",
+    "htmlContent": "HTML 内容 *",
+    "pasteHtmlHere": "将Twitter/X关注页面的HTML内容粘贴到这里...",
+    "howToGet": "获取方法：",
+    "step1": "打开 Twitter/X 的关注页面（如 x.com/xxx/following）",
+    "step2": "按 Ctrl+A 全选，Ctrl+C 复制整个页面",
+    "step3": "或者右键 → 查看页面源代码 → 复制全部",
+    "step4": "粘贴到上方文本框，点击提取",
+    "parsingHtml": "正在解析HTML...",
+    "foundUsers": "找到 {count} 个用户",
+    "selectAll": "全选",
+    "selectedUsers": "已选择 {count} 个用户",
+    "cancel": "取消",
+    "extractUsernames": "提取用户名",
+    "importCount": "导入 ({count})",
+    "noUsernamesFound": "未找到任何用户名，请确认HTML内容是否正确",
+    "parseFailed": "解析失败: {error}"
+  },
+  "userCard": {
+    "tweets": "推文",
+    "following": "关注",
+    "followers": "粉丝"
+  },
+  "modal": {
+    "close": "关闭",
+    "videoLoadFailed": "视频加载失败",
+    "watchOnNitter": "在 Nitter 观看",
+    "noReplies": "暂无回复",
+    "reply": "回复",
+    "moreReplies": "更多回复"
+  },
+  "gallery": {
+    "allContentLoaded": "已加载全部内容",
+    "noMediaContent": "暂无媒体内容",
+    "loadFailed": "加载失败: {error}",
+    "refreshResult": "更新 {updated} 个用户，新增 {newPosts} 条帖子",
+    "refreshFailed": "刷新失败: {error}",
+    "confirmDelete": "确定要删除 @{user} 吗？",
+    "importUserFailed": "导入用户信息失败"
+  },
+  "lang": {
+    "switch": "切换语言",
+    "zh": "中文",
+    "en": "English"
+  }
+}

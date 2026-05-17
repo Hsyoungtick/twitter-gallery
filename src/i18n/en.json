@@ -1,0 +1,84 @@
+{
+  "header": {
+    "refreshing": "Refreshing...",
+    "refresh": "Refresh",
+    "followingList": "Following",
+    "filter": "Filter: @{user} (click to clear)"
+  },
+  "addUser": {
+    "title": "Add Following User",
+    "username": "Username",
+    "enterUsername": "Enter Twitter username",
+    "noAtSymbol": "No @ symbol needed",
+    "cancel": "Cancel",
+    "add": "Add",
+    "pleaseEnterUsername": "Please enter a username"
+  },
+  "followingList": {
+    "title": "Following",
+    "addUser": "Add User",
+    "refresh": "Refresh",
+    "delete": "Delete"
+  },
+  "followingModal": {
+    "title": "Following ({count})",
+    "addUser": "Add User",
+    "searchUsername": "Search username...",
+    "sortLatest": "Latest",
+    "sortName": "Name",
+    "sortMediaCount": "Media Count",
+    "noMatchingUser": "No matching users found",
+    "noFollowingUser": "No following users yet",
+    "followers": "Followers",
+    "media": "Media",
+    "viewOnX": "View on X",
+    "deleteUser": "Delete User"
+  },
+  "importFollowing": {
+    "title": "Batch Import Following",
+    "hint": "Paste HTML content from the following page to extract @usernames",
+    "htmlContent": "HTML Content *",
+    "pasteHtmlHere": "Paste HTML content from Twitter/X following page here...",
+    "howToGet": "How to get it:",
+    "step1": "Open Twitter/X following page (e.g. x.com/xxx/following)",
+    "step2": "Press Ctrl+A to select all, Ctrl+C to copy the page",
+    "step3": "Or right-click → View Page Source → Copy all",
+    "step4": "Paste into the text box above and click Extract",
+    "parsingHtml": "Parsing HTML...",
+    "foundUsers": "Found {count} users",
+    "selectAll": "Select All",
+    "selectedUsers": "{count} users selected",
+    "cancel": "Cancel",
+    "extractUsernames": "Extract Usernames",
+    "importCount": "Import ({count})",
+    "noUsernamesFound": "No usernames found. Please check the HTML content",
+    "parseFailed": "Parse failed: {error}"
+  },
+  "userCard": {
+    "tweets": "Tweets",
+    "following": "Following",
+    "followers": "Followers"
+  },
+  "modal": {
+    "close": "Close",
+    "videoLoadFailed": "Video failed to load",
+    "watchOnNitter": "Watch on Nitter",
+    "noReplies": "No replies yet",
+    "reply": "Reply",
+    "moreReplies": "More replies"
+  },
+  "gallery": {
+    "allContentLoaded": "All content loaded",
+    "noMediaContent": "No media content yet",
+    "loadFailed": "Load failed: {error}",
+    "refreshResult": "Updated {updated} users, {newPosts} new posts",
+    "refreshFailed": "Refresh failed: {error}",
+    "confirmDelete": "Are you sure you want to delete @{user}?",
+    "importUserFailed": "Failed to import user info"
+  },
+  "lang": {
+    "switch": "Switch Language",
+    "zh": "中文",
+    "en": "English"
+  }
+}
