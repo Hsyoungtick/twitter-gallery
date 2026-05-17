@@ -33,6 +33,8 @@
    - `proxy = "http://host.docker.internal:7890"`：如果不可直连 twitter，需要配置代理地址
    - `hlsPlayback = true`：启用 HLS 视频流播放
 
+   示例：
+
    ```conf
    [Server]
    hostname = "127.0.0.1:8080"      # for generating links, change this to your own domain/ip
@@ -175,6 +177,49 @@ pnpm dev
 
 - 点击右上角的用户按钮导入关注用户，目前只能一个个导入，源于 nitter 和 twitter 的限制。
 - 点击右上角的刷新按钮更新关注用户的媒体内容，关注越多耗时越长，源于 nitter 的限制。
+
+## ⚡ 一键启动 & 开机自启（PM2）
+
+使用 [PM2](https://pm2.keymetrics.io/) 实现生产环境一键启动和开机自启。
+
+### 前置条件
+
+```bash
+npm install -g pm2 pm2-windows-startup
+```
+
+### 一键启动
+
+```bash
+pnpm pm2:start
+```
+
+会自动构建前端并通过 PM2 启动后端和前端服务。
+
+### 开机自启
+
+```bash
+# 将 PM2 注册为 Windows 服务（需以管理员身份运行）
+pm2-startup install
+
+# 启动应用
+pnpm pm2:start
+
+# 保存进程列表，开机时自动恢复
+pm2 save
+```
+
+### 常用命令
+
+| 命令 | 说明 |
+|------|------|
+| `pnpm pm2:start` | 构建并启动所有服务 |
+| `pnpm pm2:stop` | 停止所有服务 |
+| `pnpm pm2:restart` | 重启所有服务 |
+| `pnpm pm2:delete` | 删除所有 PM2 进程 |
+| `pnpm pm2:logs` | 查看实时日志 |
+| `pm2 monit` | 监控 CPU/内存 |
+| `pm2 status` | 查看进程状态 |
 
 ## 🏗️项目结构
 

@@ -33,6 +33,8 @@ This project depends on Nitter as the Twitter data source. Follow these steps to
    - `proxy = "http://host.docker.internal:7890"`: Proxy address if you cannot directly connect to Twitter
    - `hlsPlayback = true`: Enable HLS video stream playback
 
+   Sample:
+   
    ```conf
    [Server]
    hostname = "127.0.0.1:8080"      # for generating links, change this to your own domain/ip
@@ -175,6 +177,49 @@ Visit http://localhost:5173 to use the app.
 
 - Click the user icon in the top right to import followed users. Currently only one-by-one import is supported due to Nitter and Twitter limitations.
 - Click the refresh button in the top right to update followed users' media content. The more users you follow, the longer it takes due to Nitter limitations.
+
+## ⚡ One-Click Start & Auto-Start (PM2)
+
+Use [PM2](https://pm2.keymetrics.io/) for production deployment with one-click start and boot auto-start.
+
+### Prerequisites
+
+```bash
+npm install -g pm2 pm2-windows-startup
+```
+
+### One-Click Start
+
+```bash
+pnpm pm2:start
+```
+
+This will automatically build the frontend and start both backend and frontend via PM2.
+
+### Boot Auto-Start
+
+```bash
+# Register PM2 as a Windows service (run as Administrator)
+pm2-startup install
+
+# Start the app
+pnpm pm2:start
+
+# Save the process list so it auto-restores on boot
+pm2 save
+```
+
+### Common Commands
+
+| Command | Description |
+|---------|-------------|
+| `pnpm pm2:start` | Build & start all services |
+| `pnpm pm2:stop` | Stop all services |
+| `pnpm pm2:restart` | Restart all services |
+| `pnpm pm2:delete` | Remove all PM2 processes |
+| `pnpm pm2:logs` | View real-time logs |
+| `pm2 monit` | Monitor CPU/Memory |
+| `pm2 status` | Check process status |
 
 ## 🏗️Project Structure
 
