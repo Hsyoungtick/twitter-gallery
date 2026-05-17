@@ -143,8 +143,6 @@ cp backend/.env.example backend/.env
 | `NITTER_URL` | Nitter 实例地址 | `http://127.0.0.1:8080` |
 | `PORT` | 后端服务端口 | `3000` |
 
-根据实际情况编辑 `.env` 文件，填写你的 Nitter 实例地址和后端端口。
-
 ### 4. 安装依赖
 
 ```bash

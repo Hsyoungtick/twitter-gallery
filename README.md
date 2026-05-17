@@ -143,8 +143,6 @@ cp backend/.env.example backend/.env
 | `NITTER_URL` | Nitter instance address | `http://127.0.0.1:8080` |
 | `PORT` | Backend server port | `3000` |
 
-Edit the `.env` files according to your setup. Enter your Nitter instance address and the backend port.
-
 ### 4. Install Dependencies
 
 ```bash
