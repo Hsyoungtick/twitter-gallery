@@ -130,6 +130,7 @@ cp .env.example .env
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
 | `VITE_API_BASE` | 后端 API 地址 | `http://localhost:3000/api` |
+| `VITE_PORT` | 前端开发/预览端口 | `5173` |
 
 后端：
 
@@ -178,7 +179,7 @@ pnpm dev
 - 点击右上角的用户按钮导入关注用户，目前只能一个个导入，源于 nitter 和 twitter 的限制。
 - 点击右上角的刷新按钮更新关注用户的媒体内容，关注越多耗时越长，源于 nitter 的限制。
 
-## ⚡ 一键启动 & 开机自启（PM2）
+## 💻一键启动 & 开机自启（PM2）
 
 使用 [PM2](https://pm2.keymetrics.io/) 实现生产环境一键启动和开机自启。
 
@@ -208,18 +209,6 @@ pnpm pm2:start
 # 保存进程列表，开机时自动恢复
 pm2 save
 ```
-
-### 常用命令
-
-| 命令 | 说明 |
-|------|------|
-| `pnpm pm2:start` | 构建并启动所有服务 |
-| `pnpm pm2:stop` | 停止所有服务 |
-| `pnpm pm2:restart` | 重启所有服务 |
-| `pnpm pm2:delete` | 删除所有 PM2 进程 |
-| `pnpm pm2:logs` | 查看实时日志 |
-| `pm2 monit` | 监控 CPU/内存 |
-| `pm2 status` | 查看进程状态 |
 
 ## 🏗️项目结构
 

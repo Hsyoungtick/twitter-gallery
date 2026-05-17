@@ -130,6 +130,7 @@ cp .env.example .env
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `VITE_API_BASE` | Backend API address | `http://localhost:3000/api` |
+| `VITE_PORT` | Frontend dev/preview port | `5173` |
 
 Backend:
 
@@ -208,18 +209,6 @@ pnpm pm2:start
 # Save the process list so it auto-restores on boot
 pm2 save
 ```
-
-### Common Commands
-
-| Command | Description |
-|---------|-------------|
-| `pnpm pm2:start` | Build & start all services |
-| `pnpm pm2:stop` | Stop all services |
-| `pnpm pm2:restart` | Restart all services |
-| `pnpm pm2:delete` | Remove all PM2 processes |
-| `pnpm pm2:logs` | View real-time logs |
-| `pm2 monit` | Monitor CPU/Memory |
-| `pm2 status` | Check process status |
 
 ## 🏗️Project Structure
 
