@@ -111,44 +111,42 @@
           <div class="px-4 py-3">
             <div class="tweet-content media-body text-base whitespace-pre-wrap leading-relaxed" v-html="formatTweetContent(media.text)"></div>
             
-            <div class="tweet-stats mt-3 pt-3 flex items-center gap-5 text-sm">
-              <span class="text-gray-400 text-sm leading-tight">
-                <a 
-                  :href="`https://x.com/${authorInfo.username}/status/${media.tweetId}`"
-                  target="_blank"
-                  class="hover:underline block"
-                  :title="media.date"
-                >
-                  <span class="text-xs opacity-70">{{ formatDate(media.date).time }}</span>
-                  <span class="block">{{ formatDate(media.date).date }}</span>
-                </a>
-              </span>
-              
-              <span class="tweet-stat inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-default">
-                <svg class="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
-                </svg>
-                {{ media.replies || '0' }}
-              </span>
-              <span class="tweet-stat inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors cursor-default">
-                <svg class="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-                {{ media.retweets || '0' }}
-              </span>
-              <span class="tweet-stat inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-default">
-                <svg class="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
-                </svg>
-                {{ media.likes || '0' }}
-              </span>
-              <span class="tweet-stat inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-default">
-                <svg class="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-                {{ media.views || '0' }}
-              </span>
+            <div class="mt-3 pt-3">
+              <a 
+                :href="`https://x.com/${authorInfo.username}/status/${media.tweetId}`"
+                target="_blank"
+                class="hover:underline block text-sm text-gray-400"
+                :title="media.date"
+              >
+                {{ formatDate(media.date).date }} {{ formatDate(media.date).time }}
+              </a>
+              <div class="tweet-stats flex items-center gap-5 text-sm mt-1">
+                <span class="tweet-stat inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-default">
+                  <svg class="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+                  </svg>
+                  {{ media.replies || '0' }}
+                </span>
+                <span class="tweet-stat inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors cursor-default">
+                  <svg class="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                  </svg>
+                  {{ media.retweets || '0' }}
+                </span>
+                <span class="tweet-stat inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-default">
+                  <svg class="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                  </svg>
+                  {{ media.likes || '0' }}
+                </span>
+                <span class="tweet-stat inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-default">
+                  <svg class="h-[15px] w-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  {{ media.views || '0' }}
+                </span>
+              </div>
             </div>
           </div>
           
@@ -386,7 +384,12 @@ const formatDate = (dateStr) => {
   const minutes = String(useLocal ? date.getMinutes() : date.getUTCMinutes()).padStart(2, '0')
   const currentYear = useLocal ? new Date().getFullYear() : new Date().getUTCFullYear()
   
-  const datePart = year === currentYear ? `${month}-${day}` : `${year}-${month}-${day}`
+  let datePart
+  if (useLocal) {
+    datePart = year === currentYear ? `${month}月${day}日` : `${year}年${month}月${day}日`
+  } else {
+    datePart = year === currentYear ? `${month}-${day}` : `${year}-${month}-${day}`
+  }
   return { date: datePart, time: `${hours}:${minutes}` }
 }
 
@@ -394,7 +397,7 @@ const formatReplyDate = (dateStr) => {
   const result = formatDate(dateStr)
   if (typeof result === 'string') return result
   if (!result.time) return result.date
-  return `${result.time} ${result.date}`
+  return `${result.date} ${result.time}`
 }
 
 const formatTweetContent = (text) => {
