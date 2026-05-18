@@ -8,8 +8,8 @@
   "addUser": {
     "title": "Add Following User",
     "username": "Username",
-    "enterUsername": "Enter Twitter username",
-    "noAtSymbol": "No @ symbol needed",
+    "enterUsername": "Enter Twitter username, one per line",
+    "noAtSymbol": "No @ symbol needed, Ctrl+Enter to add",
     "cancel": "Cancel",
     "add": "Add",
     "pleaseEnterUsername": "Please enter a username"

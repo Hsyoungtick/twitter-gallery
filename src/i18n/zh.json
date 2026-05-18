@@ -8,8 +8,8 @@
   "addUser": {
     "title": "添加关注用户",
     "username": "用户名",
-    "enterUsername": "输入 Twitter 用户名",
-    "noAtSymbol": "不需要 @ 符号",
+    "enterUsername": "输入 Twitter 用户名，一行一个",
+    "noAtSymbol": "不需要 @ 符号，Ctrl+Enter 快速添加",
     "cancel": "取消",
     "add": "添加",
     "pleaseEnterUsername": "请输入用户名"

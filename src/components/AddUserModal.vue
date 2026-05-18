@@ -10,13 +10,13 @@
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium mb-1">{{ t('addUser.username') }}</label>
-            <input
+            <textarea
               v-model="username"
-              type="text"
               :placeholder="t('addUser.enterUsername')"
-              class="w-full px-3 py-2 border rounded-lg dark:bg-zinc-700 dark:border-zinc-600 focus:ring-2 focus:ring-blue-500 outline-none"
-              @keyup.enter="handleAdd"
-            />
+              rows="5"
+              class="w-full px-3 py-2 border rounded-lg dark:bg-zinc-700 dark:border-zinc-600 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+              @keydown.ctrl.enter="handleAdd"
+            ></textarea>
             <p class="text-xs text-gray-500 mt-1">{{ t('addUser.noAtSymbol') }}</p>
           </div>
           
@@ -55,13 +55,18 @@ const username = ref('')
 const error = ref('')
 
 const handleAdd = () => {
-  const name = username.value.trim().replace('@', '')
+  const names = username.value
+    .split('\n')
+    .map(line => line.trim().replace(/^@/, ''))
+    .filter(name => name.length > 0)
   
-  if (!name) {
+  if (names.length === 0) {
     error.value = t('addUser.pleaseEnterUsername')
     return
   }
   
-  emit('add', name)
+  for (const name of names) {
+    emit('add', name)
+  }
 }
 </script>
