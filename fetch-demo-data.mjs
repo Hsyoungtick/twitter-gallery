@@ -51,15 +51,17 @@ async function fetchAllMedia() {
 
   for (const username of ['NASA', 'BBCEarth']) {
     try {
-      const resp = await fetch(`${API_BASE}/user/${username}/media`)
-      const result = await resp.json()
-      if (result.media) {
-        allMedia.push(...result.media)
+      const [mediaResp, userResp] = await Promise.all([
+        fetch(`${API_BASE}/user/${username}/media`),
+        fetch(`${API_BASE}/user/${username}`)
+      ])
+      const mediaResult = await mediaResp.json()
+      const userResult = await userResp.json()
+      if (mediaResult.media) {
+        allMedia.push(...mediaResult.media)
       }
-      if (result.userInfo) {
-        usersInfo.push(sanitizeUser(result.userInfo))
-      }
-      console.log(`[demo] ${username}: ${result.media?.length || 0} 条媒体`)
+      usersInfo.push(sanitizeUser(userResult))
+      console.log(`[demo] ${username}: ${mediaResult.media?.length || 0} 条媒体`)
     } catch (err) {
       console.error(`[demo] ${username} 媒体抓取失败: ${err.message}`)
     }
