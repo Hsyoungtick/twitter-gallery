@@ -124,7 +124,7 @@ app.post('/api/following/import-user', async (req, res) => {
     console.log(`[import-user] 开始导入 @${username}`)
 
     // 获取用户信息
-    let userInfo = { username, name: username, avatar: '', bio: '', tweets: '0', following: '0', followers: '0' }
+    let userInfo = { username, name: username, avatar: '', bio: '', tweets: '0', followers: '0' }
     try {
       const userResp = await fetchWithRetry(`${NITTER_URL}/${username}`)
       const $ = cheerio.load(userResp.data)
@@ -136,7 +136,6 @@ app.post('/api/following/import-user', async (req, res) => {
     // 保存用户信息到DB
     upsertUser({
       ...userInfo,
-      tweets_count: userInfo.tweets || '0',
       media_count: '0'
     })
     upsertUsernameMapBatch([{ username, name: userInfo.name }])
@@ -158,7 +157,7 @@ app.post('/api/following/import-user', async (req, res) => {
 
     // 更新media_count
     const count = getPostsCountByUser(username)
-    upsertUser({ ...userInfo, tweets_count: userInfo.tweets || '0', media_count: String(count) })
+    upsertUser({ ...userInfo, media_count: String(count) })
 
     // 返回用户信息和媒体
     const dbUser = getUser(username)
@@ -229,7 +228,6 @@ app.get('/api/user/:username', async (req, res) => {
       avatar: avatarSrc.startsWith('http') ? avatarSrc : (avatarSrc ? `${NITTER_URL}${avatarSrc}` : ''),
       bio: $('.profile-bio').text().trim(),
       tweets: tweetsCount,
-      following: $('.profile-statlist .following .profile-stat-num').text().trim(),
       followers: $('.profile-statlist .followers .profile-stat-num').text().trim(),
     })
   } catch (error) {
@@ -737,7 +735,6 @@ function parseUserPage($, username) {
     avatar: avatarSrc.startsWith('http') ? avatarSrc : (avatarSrc ? `${NITTER_URL}${avatarSrc}` : ''),
     bio: $('.profile-bio').text().trim(),
     tweets: tweetsCount,
-    following: $('.profile-statlist .following .profile-stat-num').text().trim(),
     followers: $('.profile-statlist .followers .profile-stat-num').text().trim(),
   }
 }
@@ -810,7 +807,7 @@ const fetchAllUserInfo = async (usernames) => {
         console.log(`[user] ${u} OK`)
       } catch (err) {
         console.error(`[user] ${u} 失败: ${err.message}`)
-        results[i] = { username: u, name: u, avatar: '', bio: '', tweets: '0', media_count: '0', following: '0', followers: '0' }
+        results[i] = { username: u, name: u, avatar: '', bio: '', tweets: '0', media_count: '0', followers: '0' }
       }
       await delay(REQUEST_DELAY)
     }
@@ -897,24 +894,25 @@ app.post('/api/feed/refresh', async (req, res) => {
         userResults.push(info)
       } catch (err) {
         console.error(`[user] ${u} 失败: ${err.message}`)
-        userResults.push({ username: u, name: u, avatar: '', bio: '', tweets: '0', media_count: '0', following: '0', followers: '0' })
+        userResults.push({ username: u, name: u, avatar: '', bio: '', tweets: '0', media_count: '0', followers: '0' })
       }
       fetchedCount++
       sendEvent({ type: 'progress', current: fetchedCount, total, message: `获取用户信息 ${fetchedCount}/${total}` })
       await delay(REQUEST_DELAY)
     }
 
-    // 第三步：比较推文数，找出有更新的用户
+    // 第三步：比较媒体数，找出需要更新的用户
     const needUpdateUsers = []
     for (const freshUser of userResults) {
       const cachedUser = oldUsers[freshUser.username]
       if (!cachedUser) {
         needUpdateUsers.push(freshUser.username)
       } else {
-        const oldTweets = parseInt(cachedUser.tweets_count?.replace(/,/g, '') || '0')
-        const newTweets = parseInt(freshUser.tweets?.replace(/,/g, '') || '0')
-        if (newTweets > oldTweets) {
+        const dbMediaCount = getPostsCountByUser(freshUser.username)
+        const recordedMediaCount = parseInt(String(cachedUser.media_count).replace(/,/g, '') || '0')
+        if (dbMediaCount !== recordedMediaCount) {
           needUpdateUsers.push(freshUser.username)
+          console.log(`[refresh] ${freshUser.username}: DB实际${dbMediaCount}条 vs 记录${recordedMediaCount}条，需更新`)
         }
       }
     }
@@ -922,7 +920,6 @@ app.post('/api/feed/refresh', async (req, res) => {
     // 第四步：写入用户信息到DB
     const usersForDb = userResults.map(u => ({
       ...u,
-      tweets_count: u.tweets || '0',
       media_count: u.media_count || '0'
     }))
     upsertUsers(usersForDb)

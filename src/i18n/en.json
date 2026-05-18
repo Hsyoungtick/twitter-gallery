@@ -55,9 +55,8 @@
     "parseFailed": "Parse failed: {error}"
   },
   "userCard": {
-    "tweets": "Tweets",
-    "following": "Following",
-    "followers": "Followers"
+    "followers": "Followers",
+    "media": "Media"
   },
   "modal": {
     "close": "Close",

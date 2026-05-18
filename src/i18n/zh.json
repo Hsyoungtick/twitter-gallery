@@ -55,9 +55,8 @@
     "parseFailed": "解析失败: {error}"
   },
   "userCard": {
-    "tweets": "推文",
-    "following": "关注",
-    "followers": "粉丝"
+    "followers": "粉丝",
+    "media": "媒体"
   },
   "modal": {
     "close": "关闭",

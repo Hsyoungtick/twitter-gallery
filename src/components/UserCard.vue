@@ -15,16 +15,12 @@
         <p v-if="user.bio" class="mt-2 text-sm">{{ user.bio }}</p>
         <div class="flex space-x-4 mt-3 text-sm">
           <div>
-            <span class="font-bold">{{ user.tweets || '0' }}</span>
-            <span class="text-gray-500 dark:text-gray-400 ml-1">{{ t('userCard.tweets') }}</span>
-          </div>
-          <div>
-            <span class="font-bold">{{ user.following || '0' }}</span>
-            <span class="text-gray-500 dark:text-gray-400 ml-1">{{ t('userCard.following') }}</span>
-          </div>
-          <div>
             <span class="font-bold">{{ user.followers || '0' }}</span>
             <span class="text-gray-500 dark:text-gray-400 ml-1">{{ t('userCard.followers') }}</span>
+          </div>
+          <div>
+            <span class="font-bold">{{ user.mediaCount || user.media_count || '0' }}</span>
+            <span class="text-gray-500 dark:text-gray-400 ml-1">{{ t('userCard.media') }}</span>
           </div>
         </div>
       </div>

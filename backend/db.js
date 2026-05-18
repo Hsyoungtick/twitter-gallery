@@ -33,11 +33,8 @@ export async function initDB() {
       avatar TEXT DEFAULT '',
       bio TEXT DEFAULT '',
       media_count TEXT DEFAULT '0',
-      tweets_count TEXT DEFAULT '0',
-      following TEXT DEFAULT '0',
       followers TEXT DEFAULT '0',
       is_following INTEGER DEFAULT 1,
-      added_at TEXT DEFAULT '',
       updated_at TEXT DEFAULT ''
     )
   `)
@@ -65,7 +62,7 @@ export async function initDB() {
   db.run(`CREATE INDEX IF NOT EXISTS idx_posts_author ON posts(author)`)
   db.run(`CREATE INDEX IF NOT EXISTS idx_posts_date ON posts(date)`)
 
-  // 迁移：tweets列改为media_count，新增tweets_count
+  // 迁移：tweets列改为media_count
   try {
     const cols = db.prepare("PRAGMA table_info(users)")
     const colNames = []
@@ -75,17 +72,9 @@ export async function initDB() {
       db.run('ALTER TABLE users RENAME COLUMN tweets TO media_count')
       console.log('[db] 迁移: tweets → media_count')
     }
-    if (!colNames.includes('tweets_count')) {
-      db.run("ALTER TABLE users ADD COLUMN tweets_count TEXT DEFAULT '0'")
-      console.log('[db] 迁移: 新增 tweets_count')
-    }
     if (!colNames.includes('is_following')) {
       db.run("ALTER TABLE users ADD COLUMN is_following INTEGER DEFAULT 1")
       console.log('[db] 迁移: 新增 is_following')
-    }
-    if (!colNames.includes('added_at')) {
-      db.run("ALTER TABLE users ADD COLUMN added_at TEXT DEFAULT ''")
-      console.log('[db] 迁移: 新增 added_at')
     }
   } catch (e) {
     console.log('[db] 迁移跳过:', e.message)
@@ -95,15 +84,15 @@ export async function initDB() {
   try {
     const followingExists = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='following'")
     if (followingExists.length > 0) {
-      const followingRows = db.prepare('SELECT username, added_at FROM following')
+      const followingRows = db.prepare('SELECT username FROM following')
       while (followingRows.step()) {
         const row = followingRows.getAsObject()
         const existing = db.prepare('SELECT username FROM users WHERE username = ?')
         existing.bind([row.username])
         if (existing.step()) {
-          db.run('UPDATE users SET is_following = 1, added_at = ? WHERE username = ?', [row.added_at || '', row.username])
+          db.run('UPDATE users SET is_following = 1 WHERE username = ?', [row.username])
         } else {
-          db.run("INSERT OR IGNORE INTO users (username, name, is_following, added_at) VALUES (?, ?, 1, ?)", [row.username, row.username, row.added_at || ''])
+          db.run("INSERT OR IGNORE INTO users (username, name, is_following, updated_at) VALUES (?, ?, 1, datetime('now'))", [row.username, row.username])
         }
         existing.free()
       }
@@ -149,19 +138,19 @@ export function upsertUser(user) {
   const existing = getUser(user.username)
   if (existing) {
     db.run(`
-      UPDATE users SET name = ?, avatar = ?, bio = ?, media_count = ?, tweets_count = ?, 
-        following = ?, followers = ?, updated_at = datetime('now')
+      UPDATE users SET name = ?, avatar = ?, bio = ?, media_count = ?, 
+        followers = ?, updated_at = datetime('now')
       WHERE username = ?
     `, [user.name || existing.name || '', user.avatar || existing.avatar || '', user.bio || existing.bio || '',
-        user.media_count || existing.media_count || '0', user.tweets_count || existing.tweets_count || '0',
-        user.following || existing.following || '0', user.followers || existing.followers || '0',
+        user.media_count || existing.media_count || '0',
+        user.followers || existing.followers || '0',
         user.username])
   } else {
     db.run(`
-      INSERT INTO users (username, name, avatar, bio, media_count, tweets_count, following, followers, is_following, added_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      INSERT INTO users (username, name, avatar, bio, media_count, followers, is_following, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
     `, [user.username, user.name || '', user.avatar || '', user.bio || '',
-        user.media_count || '0', user.tweets_count || '0', user.following || '0', user.followers || '0',
+        user.media_count || '0', user.followers || '0',
         user.is_following !== undefined ? user.is_following : 1])
   }
   scheduleSave()
@@ -266,11 +255,8 @@ export function dbRowToUser(row) {
     avatar: row.avatar,
     bio: row.bio,
     media_count: row.media_count,
-    tweets_count: row.tweets_count,
-    following: row.following,
     followers: row.followers,
     is_following: row.is_following,
-    added_at: row.added_at,
   }
 }
 
@@ -338,7 +324,7 @@ export function resolveUsernames(usernames) {
 
 export function getFollowingList() {
   const results = []
-  const stmt = db.prepare('SELECT username FROM users WHERE is_following = 1 ORDER BY added_at DESC')
+  const stmt = db.prepare('SELECT username FROM users WHERE is_following = 1 ORDER BY updated_at DESC')
   while (stmt.step()) {
     results.push(stmt.getAsObject().username)
   }
@@ -349,9 +335,9 @@ export function getFollowingList() {
 export function addFollowing(username) {
   const existing = getUser(username)
   if (existing) {
-    db.run('UPDATE users SET is_following = 1, added_at = datetime("now") WHERE username = ?', [username])
+    db.run('UPDATE users SET is_following = 1, updated_at = datetime("now") WHERE username = ?', [username])
   } else {
-    db.run("INSERT OR IGNORE INTO users (username, name, is_following, added_at) VALUES (?, ?, 1, datetime('now'))", [username, username])
+    db.run("INSERT OR IGNORE INTO users (username, name, is_following, updated_at) VALUES (?, ?, 1, datetime('now'))", [username, username])
   }
   scheduleSave()
 }
@@ -360,9 +346,9 @@ export function addFollowingBatch(usernames) {
   for (const username of usernames) {
     const existing = getUser(username)
     if (existing) {
-      db.run('UPDATE users SET is_following = 1, added_at = datetime("now") WHERE username = ?', [username])
+      db.run('UPDATE users SET is_following = 1, updated_at = datetime("now") WHERE username = ?', [username])
     } else {
-      db.run("INSERT OR IGNORE INTO users (username, name, is_following, added_at) VALUES (?, ?, 1, datetime('now'))", [username, username])
+      db.run("INSERT OR IGNORE INTO users (username, name, is_following, updated_at) VALUES (?, ?, 1, datetime('now'))", [username, username])
     }
   }
   scheduleSave()
