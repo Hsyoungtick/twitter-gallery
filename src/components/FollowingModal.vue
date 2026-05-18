@@ -137,7 +137,11 @@ const sortBy = ref('latest')
 
 const parseDate = (s) => {
   if (!s || typeof s !== 'string') return new Date(0)
-  return new Date(s.replace(/·/g, ''))
+  const nitterMatch = s.match(/(\w+ \d+, \d+) · (\d+:\d+) (\w+)/)
+  if (nitterMatch) {
+    return new Date(`${nitterMatch[1]} ${nitterMatch[2]} ${nitterMatch[3]} UTC`)
+  }
+  return new Date(s.replace(/·/g, '') + ' UTC')
 }
 
 const filteredUsers = computed(() => {

@@ -366,14 +366,9 @@ const formatDate = (dateStr) => {
   const rssMatch = dateStr.match(/\w+, (\d+ \w+ \d+) (\d+:\d+:\d+)/)
   
   if (nitterMatch) {
-    date = new Date(nitterMatch[1])
-    let hours = parseInt(nitterMatch[2].split(':')[0])
-    const minutes = nitterMatch[2].split(':')[1]
-    if (nitterMatch[3] === 'PM' && hours !== 12) hours += 12
-    else if (nitterMatch[3] === 'AM' && hours === 12) hours = 0
-    date.setHours(hours, parseInt(minutes))
+    date = new Date(`${nitterMatch[1]} ${nitterMatch[2]} ${nitterMatch[3]} UTC`)
   } else if (rssMatch) {
-    date = new Date(`${rssMatch[1]} ${rssMatch[2]}`)
+    date = new Date(`${rssMatch[1]} ${rssMatch[2]} UTC`)
   } else {
     date = new Date(dateStr)
   }

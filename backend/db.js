@@ -3,6 +3,11 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 
+function stripImageParams(url) {
+  if (!url) return url
+  return url.replace(/(\.(jpg|jpeg|png|gif|webp|bmp|svg))\?[^/]+$/i, '$1')
+}
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DB_PATH = join(__dirname, 'data', 'gallery.db')
 const DB_DIR = dirname(DB_PATH)
@@ -102,6 +107,43 @@ export async function initDB() {
     }
   } catch (e) {
     console.log('[db] following迁移跳过:', e.message)
+  }
+
+  // 迁移：清理posts表中url和preview_url的图片查询参数
+  try {
+    const result = db.run(`UPDATE posts SET 
+      url = regexp_replace(url, '(\\.(jpg|jpeg|png|gif|webp|bmp|svg))\\?[^/]+$', '\\1'),
+      preview_url = regexp_replace(preview_url, '(\\.(jpg|jpeg|png|gif|webp|bmp|svg))\\?[^/]+$', '\\1')
+      WHERE url LIKE '%.jpg?%' OR url LIKE '%.jpeg?%' OR url LIKE '%.png?%' OR url LIKE '%.gif?%' OR url LIKE '%.webp?%'
+         OR preview_url LIKE '%.jpg?%' OR preview_url LIKE '%.jpeg?%' OR preview_url LIKE '%.png?%' OR preview_url LIKE '%.gif?%' OR preview_url LIKE '%.webp?%'`)
+    if (result.changes > 0) {
+      console.log(`[db] 迁移: 清理了 ${result.changes} 条帖子的图片URL查询参数`)
+      scheduleSave()
+    }
+  } catch (e) {
+    // SQLite可能不支持regexp_replace，用JS方式处理
+    try {
+      const stmt = db.prepare('SELECT id, url, preview_url FROM posts')
+      const updates = []
+      while (stmt.step()) {
+        const row = stmt.getAsObject()
+        const cleanUrl = stripImageParams(row.url)
+        const cleanPreview = stripImageParams(row.preview_url)
+        if (cleanUrl !== row.url || cleanPreview !== row.preview_url) {
+          updates.push({ id: row.id, url: cleanUrl, preview_url: cleanPreview })
+        }
+      }
+      stmt.free()
+      for (const u of updates) {
+        db.run('UPDATE posts SET url = ?, preview_url = ? WHERE id = ?', [u.url, u.preview_url, u.id])
+      }
+      if (updates.length > 0) {
+        console.log(`[db] 迁移: 清理了 ${updates.length} 条帖子的图片URL查询参数`)
+        scheduleSave()
+      }
+    } catch (e2) {
+      console.log('[db] 图片URL清理迁移跳过:', e2.message)
+    }
   }
 
   db.run(`

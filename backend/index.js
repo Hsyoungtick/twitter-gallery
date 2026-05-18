@@ -5,6 +5,10 @@ import * as cheerio from 'cheerio'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { config } from 'dotenv'
+
+// 确保日志实时输出
+if (process.stdout._handle?.setBlocking) process.stdout._handle.setBlocking(true)
+
 import { initDB, upsertUsers, upsertUser, upsertPosts, getUsersByUsernames, getPostsByUsernames, getPostsCountByUser, deleteUser, getUser, upsertUsernameMapBatch, resolveUsernames, deletePostsByUser, cleanupNonFollowing, dbRowToUser, getFollowingList, addFollowing, addFollowingBatch, removeFollowing } from './db.js'
 
 config({ path: join(dirname(fileURLToPath(import.meta.url)), '.env') })
@@ -124,7 +128,7 @@ app.post('/api/following/import-user', async (req, res) => {
     console.log(`[import-user] 开始导入 @${username}`)
 
     // 获取用户信息
-    let userInfo = { username, name: username, avatar: '', bio: '', tweets: '0', followers: '0' }
+    let userInfo = { username, name: username, avatar: '', bio: '', followers: '0' }
     try {
       const userResp = await fetchWithRetry(`${NITTER_URL}/${username}`)
       const $ = cheerio.load(userResp.data)
@@ -212,12 +216,6 @@ app.get('/api/user/:username', async (req, res) => {
     const $ = cheerio.load(response.data)
     
     const avatarSrc = stripImageParams($('.profile-card-avatar img').attr('src') || '')
-    let tweetsCount = $('.profile-statlist .tweets .profile-stat-num').text().trim()
-    if (!tweetsCount || tweetsCount === '0') {
-      tweetsCount = $('.profile-statlist li:first-child .profile-stat-num').text().trim() ||
-                     $('.stats li:first-child b').text().trim() ||
-                     $('.stats li:first-child').text().trim()
-    }
     
     const name = $('.profile-card-fullname').text().trim() || username
     upsertUsernameMapBatch([{ username, name }])
@@ -227,7 +225,6 @@ app.get('/api/user/:username', async (req, res) => {
       name,
       avatar: avatarSrc.startsWith('http') ? avatarSrc : (avatarSrc ? `${NITTER_URL}${avatarSrc}` : ''),
       bio: $('.profile-bio').text().trim(),
-      tweets: tweetsCount,
       followers: $('.profile-statlist .followers .profile-stat-num').text().trim(),
     })
   } catch (error) {
@@ -722,19 +719,12 @@ function parseMediaPage($, username) {
 // ========== 辅助函数：解析nitter用户页面 ==========
 function parseUserPage($, username) {
   const avatarSrc = stripImageParams($('.profile-card-avatar img').attr('src') || '')
-  let tweetsCount = $('.profile-statlist .tweets .profile-stat-num').text().trim()
-  if (!tweetsCount || tweetsCount === '0') {
-    tweetsCount = $('.profile-statlist li:first-child .profile-stat-num').text().trim() ||
-                   $('.stats li:first-child b').text().trim() ||
-                   $('.stats li:first-child').text().trim()
-  }
   
   return {
     username,
     name: $('.profile-card-fullname').text().trim() || username,
     avatar: avatarSrc.startsWith('http') ? avatarSrc : (avatarSrc ? `${NITTER_URL}${avatarSrc}` : ''),
     bio: $('.profile-bio').text().trim(),
-    tweets: tweetsCount,
     followers: $('.profile-statlist .followers .profile-stat-num').text().trim(),
   }
 }
@@ -807,7 +797,7 @@ const fetchAllUserInfo = async (usernames) => {
         console.log(`[user] ${u} OK`)
       } catch (err) {
         console.error(`[user] ${u} 失败: ${err.message}`)
-        results[i] = { username: u, name: u, avatar: '', bio: '', tweets: '0', media_count: '0', followers: '0' }
+        results[i] = { username: u, name: u, avatar: '', bio: '', media_count: '0', followers: '0' }
       }
       await delay(REQUEST_DELAY)
     }
@@ -894,7 +884,7 @@ app.post('/api/feed/refresh', async (req, res) => {
         userResults.push(info)
       } catch (err) {
         console.error(`[user] ${u} 失败: ${err.message}`)
-        userResults.push({ username: u, name: u, avatar: '', bio: '', tweets: '0', media_count: '0', followers: '0' })
+        userResults.push({ username: u, name: u, avatar: '', bio: '', media_count: '0', followers: '0' })
       }
       fetchedCount++
       sendEvent({ type: 'progress', current: fetchedCount, total, message: `获取用户信息 ${fetchedCount}/${total}` })
@@ -911,8 +901,7 @@ app.post('/api/feed/refresh', async (req, res) => {
       } else {
         const dbMediaCount = getPostsCountByUser(freshUser.username)
         const recordedMediaCount = parseInt(String(cachedUser.media_count).replace(/,/g, '') || '0')
-        const nitterTweets = parseInt(String(freshUser.tweets).replace(/,/g, '') || '0')
-        console.log(`[refresh] ${freshUser.username}: DB实际${dbMediaCount}条, 记录${recordedMediaCount}条, Nitter推文${nitterTweets}`)
+        console.log(`[refresh] ${freshUser.username}: DB实际${dbMediaCount}条, 记录${recordedMediaCount}条`)
         if (dbMediaCount === 0) {
           needUpdateUsers.push(freshUser.username)
           console.log(`[refresh] ${freshUser.username}: DB中0条帖子，需获取媒体`)
