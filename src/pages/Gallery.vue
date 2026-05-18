@@ -313,6 +313,7 @@ const resetObserver = () => {
 }
 
 onMounted(async () => {
+  await nitterApi.checkBackendAndInit()
   await loadFollowing()
   await loadFeed(true)
   setupObserver()

@@ -8,19 +8,22 @@
         <span class="text-xl md:text-2xl uppercase font-bold">Twitter Gallery</span>
       </div>
       <div class="flex items-center space-x-2">
-        <span v-if="refreshing && refreshProgress" class="text-xs text-blue-500 whitespace-nowrap">{{ refreshProgress.message }}</span>
-        <span v-else-if="refreshing" class="text-xs text-blue-500 animate-pulse whitespace-nowrap">{{ t('header.refreshing') }}</span>
-        <span v-else-if="refreshResult" class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ refreshResult }}</span>
-        <button
-          @click="handleRefresh?.()"
-          :disabled="refreshing"
-          class="p-2 rounded-lg bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 dark:hover:bg-zinc-600 transition-colors disabled:opacity-50"
-          :title="t('header.refresh')"
-        >
-          <svg class="h-5 w-5" :class="{ 'animate-spin': refreshing }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-          </svg>
-        </button>
+        <span v-if="isDemoMode()" class="text-xs bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium">Demo</span>
+        <template v-if="!isDemoMode()">
+          <span v-if="refreshing && refreshProgress" class="text-xs text-blue-500 whitespace-nowrap">{{ refreshProgress.message }}</span>
+          <span v-else-if="refreshing" class="text-xs text-blue-500 animate-pulse whitespace-nowrap">{{ t('header.refreshing') }}</span>
+          <span v-else-if="refreshResult" class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ refreshResult }}</span>
+          <button
+            @click="handleRefresh?.()"
+            :disabled="refreshing"
+            class="p-2 rounded-lg bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 dark:hover:bg-zinc-600 transition-colors disabled:opacity-50"
+            :title="t('header.refresh')"
+          >
+            <svg class="h-5 w-5" :class="{ 'animate-spin': refreshing }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+          </button>
+        </template>
         <span v-if="filterUser" class="text-xs text-blue-500 font-medium whitespace-nowrap">@{{ filterUser }}</span>
         <button
           v-if="filterUser"
@@ -55,6 +58,7 @@
 import { inject } from 'vue'
 import { UsersIcon } from '@heroicons/vue/24/outline'
 import { useI18n } from '../i18n'
+import { isDemoMode } from '../utils/api'
 
 const { t, toggleLocale, localeLabel } = useI18n()
 

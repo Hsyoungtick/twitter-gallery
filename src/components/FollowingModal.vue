@@ -9,6 +9,7 @@
           <h2 class="text-lg font-bold">{{ t('followingModal.title', { count: filteredUsers.length }) }}</h2>
           <div class="flex items-center gap-2">
             <button
+              v-if="!isDemoMode()"
               @click="$emit('add')"
               class="p-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors"
               :title="t('followingModal.addUser')"
@@ -104,6 +105,7 @@
               </a>
 
               <button
+                v-if="!isDemoMode()"
                 @click.stop="$emit('delete', user.username)"
                 class="p-1.5 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-500/20 text-red-500 transition-all flex-shrink-0"
                 :title="t('followingModal.deleteUser')"
@@ -122,6 +124,7 @@
 import { computed, ref } from 'vue'
 import { XMarkIcon, PlusIcon, UserIcon, TrashIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import { useI18n } from '../i18n'
+import { isDemoMode } from '../utils/api'
 
 const { t, currentLocale } = useI18n()
 

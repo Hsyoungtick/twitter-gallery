@@ -112,13 +112,16 @@
             <div class="tweet-content media-body text-base whitespace-pre-wrap leading-relaxed" v-html="formatTweetContent(media.text)"></div>
             
             <div class="tweet-stats mt-3 pt-3 flex items-center gap-5 text-sm">
-              <span class="text-gray-400 text-sm">
+              <span class="text-gray-400 text-sm leading-tight">
                 <a 
                   :href="`https://x.com/${authorInfo.username}/status/${media.tweetId}`"
                   target="_blank"
-                  class="hover:underline"
+                  class="hover:underline block"
                   :title="media.date"
-                >{{ formatDate(media.date) }}</a>
+                >
+                  <span class="text-xs opacity-70">{{ formatDate(media.date).time }}</span>
+                  <span class="block">{{ formatDate(media.date).date }}</span>
+                </a>
               </span>
               
               <span class="tweet-stat inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-default">
@@ -360,7 +363,7 @@ const xUrl = computed(() => {
 })
 
 const formatDate = (dateStr) => {
-  if (!dateStr) return ''
+  if (!dateStr) return { date: '', time: '' }
   let date
   const nitterMatch = dateStr.match(/(\w+ \d+, \d+) · (\d+:\d+) (\w+)/)
   const rssMatch = dateStr.match(/\w+, (\d+ \w+ \d+) (\d+:\d+:\d+)/)
@@ -373,7 +376,7 @@ const formatDate = (dateStr) => {
     date = new Date(dateStr)
   }
   
-  if (isNaN(date.getTime())) return dateStr
+  if (isNaN(date.getTime())) return { date: dateStr, time: '' }
   
   const useLocal = currentLocale.value === 'zh'
   const year = useLocal ? date.getFullYear() : date.getUTCFullYear()
@@ -381,14 +384,18 @@ const formatDate = (dateStr) => {
   const day = String(useLocal ? date.getDate() : date.getUTCDate()).padStart(2, '0')
   const hours = String(useLocal ? date.getHours() : date.getUTCHours()).padStart(2, '0')
   const minutes = String(useLocal ? date.getMinutes() : date.getUTCMinutes()).padStart(2, '0')
-  const time = `${hours}:${minutes}`
   const currentYear = useLocal ? new Date().getFullYear() : new Date().getUTCFullYear()
   
-  if (year === currentYear) return `${month}-${day} ${time}`
-  return `${year}-${month}-${day} ${time}`
+  const datePart = year === currentYear ? `${month}-${day}` : `${year}-${month}-${day}`
+  return { date: datePart, time: `${hours}:${minutes}` }
 }
 
-const formatReplyDate = formatDate
+const formatReplyDate = (dateStr) => {
+  const result = formatDate(dateStr)
+  if (typeof result === 'string') return result
+  if (!result.time) return result.date
+  return `${result.time} ${result.date}`
+}
 
 const formatTweetContent = (text) => {
   if (!text) return ''

@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => {
   const port = parseInt(env.VITE_PORT || '5173', 10)
 
   return {
+    base: process.env.VITE_BASE || '/',
     plugins: [vue()],
     server: {
       port,

@@ -2,7 +2,7 @@
 
 ### Twitter Gallery
 
-A masonry-style Twitter/X media gallery powered by [Nitter](https://github.com/zedeus/nitter)
+A masonry-style Twitter/X media gallery browser based on [Nitter](https://github.com/zedeus/nitter)
 
 [中文](README_zh.md) / English
 
@@ -12,13 +12,21 @@ A masonry-style Twitter/X media gallery powered by [Nitter](https://github.com/z
 
 </div>
 
+## 💻 Features
 
+- Masonry-style media content display
+- In-page popup for tweet details
+- Unfolded, hierarchical tweet reply display
+- @ID automatically displayed as nickname
+- Quick links to source URLs everywhere
+- Local caching to avoid repeated requests
+- Bilingual support (Chinese & English)
 
 ## 🚀 Quick Start
 
 ### 1. Deploy Nitter Instance
 
-This project depends on Nitter as the Twitter data source. Follow these steps to deploy:
+This project depends on Nitter as the Twitter data source. Follow these steps to deploy (Docker deployment recommended):
 
 1. Clone the Nitter project
    ```bash
@@ -34,7 +42,7 @@ This project depends on Nitter as the Twitter data source. Follow these steps to
    - `hlsPlayback = true`: Enable HLS video stream playback
 
    Sample:
-   
+
    ```conf
    [Server]
    hostname = "127.0.0.1:8080"      # for generating links, change this to your own domain/ip
@@ -108,7 +116,7 @@ This project depends on Nitter as the Twitter data source. Follow these steps to
    docker-compose up -d
    ```
 
-Once deployed, fill in the Nitter address in the backend `.env` configuration file.
+Once deployed, fill in the Nitter address in the `.env` configuration file.
 
 
 
@@ -174,8 +182,9 @@ pnpm dev
 
 Visit http://localhost:5173 to use the app.
 
-- Click the user icon in the top right to import followed users. Currently only one-by-one import is supported due to Nitter and Twitter limitations.
+- Click the user icon in the top right to import followed users. Supports batch import, one username per line.
 - Click the refresh button in the top right to update followed users' media content. The more users you follow, the longer it takes due to Nitter limitations.
+- Click a user in the following list to filter and view only that user's media content.
 
 ## ⚡ One-Click Start & Auto-Start (PM2)
 
@@ -208,7 +217,7 @@ pnpm pm2:start
 pm2 save
 ```
 
-## 🏗️Project Structure
+## 🏗️ Project Structure
 
 ```
 twitter-gallery/
