@@ -901,13 +901,17 @@ app.post('/api/feed/refresh', async (req, res) => {
       } else {
         const dbMediaCount = getPostsCountByUser(freshUser.username)
         const recordedMediaCount = parseInt(String(cachedUser.media_count).replace(/,/g, '') || '0')
-        console.log(`[refresh] ${freshUser.username}: DB实际${dbMediaCount}条, 记录${recordedMediaCount}条`)
+        const noAvatar = !cachedUser.avatar
+        console.log(`[refresh] ${freshUser.username}: DB实际${dbMediaCount}条, 记录${recordedMediaCount}条${noAvatar ? ', 无头像' : ''}`)
         if (dbMediaCount === 0) {
           needUpdateUsers.push(freshUser.username)
           console.log(`[refresh] ${freshUser.username}: DB中0条帖子，需获取媒体`)
         } else if (dbMediaCount !== recordedMediaCount) {
           needUpdateUsers.push(freshUser.username)
           console.log(`[refresh] ${freshUser.username}: DB实际${dbMediaCount}条 vs 记录${recordedMediaCount}条，需更新`)
+        } else if (noAvatar) {
+          needUpdateUsers.push(freshUser.username)
+          console.log(`[refresh] ${freshUser.username}: 无头像，需重新导入`)
         }
       }
     }

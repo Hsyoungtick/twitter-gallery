@@ -144,6 +144,12 @@ const loadFeed = async (isInitial = false) => {
       await handleRefresh()
       return
     }
+
+    if (result.usersInfo && result.usersInfo.some(u => !u.avatar) && followingList.value.length > 0) {
+      loading.value = false
+      await handleRefresh()
+      return
+    }
     
   } catch (err) {
     error.value = t('gallery.loadFailed', { error: err.message })
