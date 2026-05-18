@@ -8,7 +8,6 @@
         <span class="text-xl md:text-2xl uppercase font-bold">Twitter Gallery</span>
       </div>
       <div class="flex items-center space-x-2">
-        <span v-if="isDemoMode()" class="text-xs bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium">Demo</span>
         <template v-if="!isDemoMode()">
           <span v-if="refreshing && refreshProgress" class="text-xs text-blue-500 whitespace-nowrap">{{ refreshProgress.message }}</span>
           <span v-else-if="refreshing" class="text-xs text-blue-500 animate-pulse whitespace-nowrap">{{ t('header.refreshing') }}</span>
