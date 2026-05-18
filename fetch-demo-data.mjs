@@ -18,6 +18,13 @@ const sanitizeUrl = (url) => {
   if (url.startsWith('/pic/')) {
     try { url = decodeURIComponent(url.replace(/^\/pic\//, '')) } catch {}
   }
+  const videoMatch = url.match(/^\/video\/[^/]+\/(https?.*)$/)
+  if (videoMatch) {
+    try { url = decodeURIComponent(videoMatch[1]) } catch {}
+  }
+  url = url.replace(/https:\/\/pbs\.twimg\.com\/(amplify_video_thumb|ext_tw_video_thumb|media)\/([^?]+)/, (match, type, path) => {
+    try { return `https://pbs.twimg.com/${type}/${decodeURIComponent(path)}` } catch { return match }
+  })
   return url
 }
 
@@ -113,8 +120,8 @@ async function main() {
   console.log(`\n[demo] 评论统计: ${Object.keys(replies).length} 条推文有评论数据, 共 ${totalReplies} 条评论`)
 
   const demoData = { media, usersInfo, replies }
-  writeFileSync('public/demo-data.json', JSON.stringify(demoData, null, 2))
-  console.log(`[demo] 完成！已写入 public/demo-data.json`)
+  writeFileSync('data/demo-data.json', JSON.stringify(demoData, null, 2))
+  console.log(`[demo] 完成！已写入 data/demo-data.json`)
 }
 
 main().catch(err => {
