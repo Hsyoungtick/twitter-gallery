@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 
 function stripImageParams(url) {
   if (!url) return url
-  return url.replace(/(\.(jpg|jpeg|png|gif|webp|bmp|svg))\?[^/]+$/i, '$1')
+  return url.replace(/(\.(jpg|jpeg|png|gif|webp|bmp|svg))(?:\?[^/]*|%3[Ff].*)$/i, '$1')
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url))

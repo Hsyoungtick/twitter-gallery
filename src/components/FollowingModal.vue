@@ -176,20 +176,23 @@ const formatDate = (dateStr) => {
   if (isNaN(d.getTime())) return dateStr
   const now = new Date()
   const pad = (n) => String(n).padStart(2, '0')
-  const month = pad(d.getMonth() + 1)
-  const day = pad(d.getDate())
-  const hour = pad(d.getHours())
-  const minute = pad(d.getMinutes())
+  const useLocal = currentLocale.value === 'zh'
+  const year = useLocal ? d.getFullYear() : d.getUTCFullYear()
+  const month = pad((useLocal ? d.getMonth() : d.getUTCMonth()) + 1)
+  const day = pad(useLocal ? d.getDate() : d.getUTCDate())
+  const hour = pad(useLocal ? d.getHours() : d.getUTCHours())
+  const minute = pad(useLocal ? d.getMinutes() : d.getUTCMinutes())
   const time = `${hour}:${minute}`
+  const currentYear = useLocal ? now.getFullYear() : now.getUTCFullYear()
   if (currentLocale.value === 'zh') {
-    if (d.getFullYear() === now.getFullYear()) {
+    if (year === currentYear) {
       return `${month}月${day}日 ${time}`
     }
-    return `${d.getFullYear()}年${month}月${day}日 ${time}`
+    return `${year}年${month}月${day}日 ${time}`
   }
-  if (d.getFullYear() === now.getFullYear()) {
+  if (year === currentYear) {
     return `${month}-${day} ${time}`
   }
-  return `${d.getFullYear()}-${month}-${day} ${time}`
+  return `${year}-${month}-${day} ${time}`
 }
 </script>

@@ -22,7 +22,7 @@ app.use(express.json())
 
 function stripImageParams(url) {
   if (!url) return url
-  return url.replace(/(\.(jpg|jpeg|png|gif|webp|bmp|svg))\?[^/]+$/i, '$1')
+  return url.replace(/(\.(jpg|jpeg|png|gif|webp|bmp|svg))(?:\?[^/]*|%3[Ff].*)$/i, '$1')
 }
 
 app.use('/video', async (req, res) => {

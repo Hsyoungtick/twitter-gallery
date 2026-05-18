@@ -267,7 +267,7 @@ import Hls from 'hls.js'
 import nitterApi from '../utils/api'
 import { useI18n } from '../i18n'
 
-const { t } = useI18n()
+const { t, currentLocale } = useI18n()
 
 const props = defineProps({
   media: Object,
@@ -375,11 +375,14 @@ const formatDate = (dateStr) => {
   
   if (isNaN(date.getTime())) return dateStr
   
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const time = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
-  const currentYear = new Date().getFullYear()
+  const useLocal = currentLocale.value === 'zh'
+  const year = useLocal ? date.getFullYear() : date.getUTCFullYear()
+  const month = String((useLocal ? date.getMonth() : date.getUTCMonth()) + 1).padStart(2, '0')
+  const day = String(useLocal ? date.getDate() : date.getUTCDate()).padStart(2, '0')
+  const hours = String(useLocal ? date.getHours() : date.getUTCHours()).padStart(2, '0')
+  const minutes = String(useLocal ? date.getMinutes() : date.getUTCMinutes()).padStart(2, '0')
+  const time = `${hours}:${minutes}`
+  const currentYear = useLocal ? new Date().getFullYear() : new Date().getUTCFullYear()
   
   if (year === currentYear) return `${month}-${day} ${time}`
   return `${year}-${month}-${day} ${time}`
