@@ -3,7 +3,7 @@
     <div class="dark:text-gray-50 pb-5 min-h-screen bg-gray-50 dark:bg-zinc-900">
       <div class="top-gradient h-3"></div>
       <div v-if="isDemoMode()" class="bg-amber-500 text-amber-950 text-center py-2 px-4 text-sm font-medium">
-        ⚠️ 当前为演示版本，数据为静态快照，无 Nitter 后端服务，部分功能不可用
+        {{ t('demo.banner') }}
       </div>
       <div class="container mx-auto px-4">
         <Header />
@@ -17,6 +17,9 @@
 import { ref, provide, onMounted } from 'vue'
 import Header from './components/Header.vue'
 import { isDemoMode } from './utils/api'
+import { useI18n } from './i18n'
+
+const { t } = useI18n()
 
 const showFollowingModal = ref(false)
 const refreshing = ref(false)

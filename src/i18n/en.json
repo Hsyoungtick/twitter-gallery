@@ -75,6 +75,9 @@
     "confirmDelete": "Are you sure you want to delete @{user}?",
     "importUserFailed": "Failed to import user info"
   },
+  "demo": {
+    "banner": "⚠️ This is a demo version with static data. No Nitter backend — some features are unavailable"
+  },
   "lang": {
     "switch": "Switch Language",
     "zh": "中文",
