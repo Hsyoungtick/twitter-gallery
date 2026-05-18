@@ -907,10 +907,16 @@ app.post('/api/feed/refresh', async (req, res) => {
       const cachedUser = oldUsers[freshUser.username]
       if (!cachedUser) {
         needUpdateUsers.push(freshUser.username)
+        console.log(`[refresh] ${freshUser.username}: 新用户，需获取媒体`)
       } else {
         const dbMediaCount = getPostsCountByUser(freshUser.username)
         const recordedMediaCount = parseInt(String(cachedUser.media_count).replace(/,/g, '') || '0')
-        if (dbMediaCount !== recordedMediaCount) {
+        const nitterTweets = parseInt(String(freshUser.tweets).replace(/,/g, '') || '0')
+        console.log(`[refresh] ${freshUser.username}: DB实际${dbMediaCount}条, 记录${recordedMediaCount}条, Nitter推文${nitterTweets}`)
+        if (dbMediaCount === 0) {
+          needUpdateUsers.push(freshUser.username)
+          console.log(`[refresh] ${freshUser.username}: DB中0条帖子，需获取媒体`)
+        } else if (dbMediaCount !== recordedMediaCount) {
           needUpdateUsers.push(freshUser.username)
           console.log(`[refresh] ${freshUser.username}: DB实际${dbMediaCount}条 vs 记录${recordedMediaCount}条，需更新`)
         }
