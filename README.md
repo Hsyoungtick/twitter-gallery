@@ -162,9 +162,9 @@ twitter-gallery/
 └── package.json
 ```
 
-## 💖 Acknowledgments
+## ✨ Inspired By
 
-- Inspired by [twitter-media-gallery](https://github.com/sajjadalis/twitter-media-gallery)
+- Inspired by [twitter-media-gallery](https://github.com/sajjadalis/twitter-media-gallery): Use Twitter's Official API to fetch media (photos and videos) from a Twitter user's timeline or hashtag/keyword search results, then display it in a masonry layout
 
 ## 🤖 Disclaimer
 

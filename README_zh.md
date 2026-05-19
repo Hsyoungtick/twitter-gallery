@@ -14,7 +14,7 @@
 
 </div>
 
-## 💻 功能特性
+## 💻 功能
 
 - 瀑布流形式展示媒体内容
 - 页内弹窗形式展示推文详情
@@ -162,9 +162,9 @@ twitter-gallery/
 └── package.json
 ```
 
-## 💖 致谢
+## ✨ 灵感来源
 
-- 参考了 [twitter-media-gallery](https://github.com/sajjadalis/twitter-media-gallery) 的思路
+- [twitter-media-gallery](https://github.com/sajjadalis/twitter-media-gallery): 通过推特官方 API 获取推特内容中的媒体资源（图片 + 视频），并以瀑布流布局展示
 
 ## 🤖 免责声明
 
