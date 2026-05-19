@@ -64,7 +64,9 @@
     "watchOnNitter": "Watch on Nitter",
     "noReplies": "No replies yet",
     "reply": "Reply",
-    "moreReplies": "More replies"
+    "moreReplies": "More replies",
+    "prev": "Previous",
+    "next": "Next"
   },
   "gallery": {
     "allContentLoaded": "All content loaded",

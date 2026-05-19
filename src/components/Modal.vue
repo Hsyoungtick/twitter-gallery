@@ -6,18 +6,8 @@
       ref="modalOverlay"
     >
       <div class="relative w-full h-full flex">
-        <a
-          :href="xUrl"
-          target="_blank"
-          class="absolute top-4 right-16 z-10 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-2"
-          @click.stop
-        >
-          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-          </svg>
-        </a>
         <button
-          class="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-2"
+          class="absolute top-4 left-4 z-10 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-2"
           @click.stop="$emit('close')"
           :title="t('modal.close')"
         >
@@ -27,24 +17,50 @@
         </button>
         
         <div 
-          class="flex-1 flex items-center justify-center p-2 min-w-0 overflow-hidden"
-          @click.self="imgFullscreen ? (imgFullscreen = false) : $emit('close')"
+          class="flex-1 flex items-center justify-center p-2 min-w-0 overflow-hidden relative"
+          @click.self="onBlankClick"
           @mousemove="onImgMouseMove"
           @mouseup="onImgMouseUp"
           @mouseleave="onImgMouseUp"
+          @wheel.prevent="onImgWheel"
         >
+          <button
+            v-if="hasPrevMedia"
+            class="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white hover:text-gray-300 transition-colors bg-black/50 hover:bg-black/70 rounded-full p-3"
+            @click.stop="navigatePrev"
+            :title="t('modal.prev')"
+          >
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <button
+            v-if="hasNextMedia"
+            class="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white hover:text-gray-300 transition-colors bg-black/50 hover:bg-black/70 rounded-full p-3"
+            @click.stop="navigateNext"
+            :title="t('modal.next')"
+          >
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+          <div
+            v-if="tweetMediaList.length > 1"
+            class="absolute top-4 right-4 z-10 text-white bg-black/50 rounded-full px-3 py-1 text-sm"
+          >
+            {{ currentMediaIndex + 1 }}/{{ tweetMediaList.length }}
+          </div>
           <div class="w-[95%] h-[95vh] max-h-[95vh] flex items-center justify-center">
-            <div v-if="media" class="w-full h-full flex items-center justify-center" @click.self="imgFullscreen ? (imgFullscreen = false) : $emit('close')">
+            <div v-if="media" class="w-full h-full flex items-center justify-center" @click.self="onBlankClick">
               <img
                 v-if="media.type === 'photo'"
                 :src="media.url"
                 :alt="media.text"
                 ref="imgRef"
-                class="max-w-full max-h-full object-contain rounded-lg cursor-zoom-in"
-                :class="{ 'cursor-zoom-out': imgFullscreen && imgScale <= 1, 'cursor-grab': imgFullscreen && imgScale > 1 }"
+                class="max-w-full max-h-full object-contain rounded-lg"
+                :class="{ 'cursor-grab': imgScale > 1 && !isDragging, 'cursor-grabbing': imgScale > 1 && isDragging, 'cursor-zoom-in': imgScale <= 1 }"
                 :style="imgStyle"
-                @click.stop="toggleFullscreen"
-                @wheel.prevent="onImgWheel"
+                @click.stop="onImgClick"
                 @mousedown.prevent="onImgMouseDown"
               />
               
@@ -80,10 +96,10 @@
         </div>
       </div>
       
-        <div v-if="media && !imgFullscreen" class="w-[420px] bg-white dark:bg-zinc-900 flex flex-col h-full overflow-y-auto">
+        <div v-if="media && imgScale <= 1" class="w-[420px] bg-white dark:bg-zinc-900 flex flex-col h-full overflow-y-auto">
           <div v-if="authorInfo" class="tweet-header p-4 border-b dark:border-zinc-700">
             <div class="flex items-start">
-              <a :href="`https://x.com/${authorInfo.username}`" target="_blank" class="tweet-avatar flex-shrink-0 mr-3 hover:opacity-80 transition-opacity">
+              <a :href="xUrl" target="_blank" class="tweet-avatar flex-shrink-0 mr-3 hover:opacity-80 transition-opacity">
                 <img
                   v-if="authorInfo.avatar"
                   :src="authorInfo.avatar"
@@ -94,12 +110,12 @@
               <div class="flex-1 min-w-0">
                 <div class="fullname-and-username">
                   <a 
-                    :href="`https://x.com/${authorInfo.username}`" 
+                    :href="xUrl"
                     target="_blank"
                     class="fullname font-bold text-base text-gray-900 dark:text-gray-100 hover:underline block"
                   >{{ authorInfo.name }}</a>
                   <a 
-                    :href="`https://x.com/${authorInfo.username}`" 
+                    :href="xUrl"
                     target="_blank"
                     class="username text-gray-500 dark:text-gray-400 text-sm hover:underline block mt-0.5"
                   >@{{ authorInfo.username }}</a>
@@ -272,10 +288,14 @@ const { t, currentLocale } = useI18n()
 
 const props = defineProps({
   media: Object,
-  authorInfo: Object
+  authorInfo: Object,
+  tweetMediaList: {
+    type: Array,
+    default: () => []
+  }
 })
 
-defineEmits(['close'])
+const emit = defineEmits(['close', 'navigate'])
 
 const videoRef = ref(null)
 const videoError = ref(false)
@@ -288,7 +308,6 @@ let hlsInstance = null
 
 const imgRef = ref(null)
 const imgScale = ref(1)
-const imgFullscreen = ref(false)
 const imgOffsetX = ref(0)
 const imgOffsetY = ref(0)
 let isDragging = false
@@ -297,47 +316,75 @@ let dragStartY = 0
 let dragOffsetX = 0
 let dragOffsetY = 0
 
+const currentMediaIndex = computed(() => {
+  if (!props.media || !props.tweetMediaList.length) return -1
+  return props.tweetMediaList.findIndex(m => m.id === props.media.id)
+})
+
+const hasPrevMedia = computed(() => currentMediaIndex.value > 0)
+const hasNextMedia = computed(() => currentMediaIndex.value >= 0 && currentMediaIndex.value < props.tweetMediaList.length - 1)
+
+const navigatePrev = () => {
+  if (hasPrevMedia.value) {
+    emit('navigate', props.tweetMediaList[currentMediaIndex.value - 1])
+  }
+}
+
+const navigateNext = () => {
+  if (hasNextMedia.value) {
+    emit('navigate', props.tweetMediaList[currentMediaIndex.value + 1])
+  }
+}
+
+const onKeydown = (e) => {
+  if (e.key === 'ArrowLeft') {
+    navigatePrev()
+  } else if (e.key === 'ArrowRight') {
+    navigateNext()
+  }
+}
+
 const imgStyle = computed(() => {
-  if (!imgFullscreen.value) return {}
+  if (imgScale.value <= 1) return {}
   return {
     transform: `scale(${imgScale.value}) translate(${imgOffsetX.value}px, ${imgOffsetY.value}px)`,
     transformOrigin: 'center center',
     transition: isDragging ? 'none' : 'transform 0.15s ease',
     maxWidth: '100vw',
     maxHeight: '100vh',
-    cursor: imgScale.value > 1 ? 'grab' : 'zoom-out',
   }
 })
 
-const toggleFullscreen = () => {
-  if (!imgFullscreen.value) {
-    imgFullscreen.value = true
-    imgScale.value = 1
-    imgOffsetX.value = 0
-    imgOffsetY.value = 0
-  } else {
-    if (imgScale.value > 1) {
-      imgScale.value = 1
+const onImgWheel = (e) => {
+  const delta = e.deltaY > 0 ? -0.15 : 0.15
+  const newScale = Math.max(1, Math.min(10, imgScale.value + delta))
+  if (newScale !== imgScale.value) {
+    imgScale.value = newScale
+    if (imgScale.value <= 1) {
       imgOffsetX.value = 0
       imgOffsetY.value = 0
-    } else {
-      imgFullscreen.value = false
     }
   }
 }
 
-const onImgWheel = (e) => {
-  if (!imgFullscreen.value) return
-  const delta = e.deltaY > 0 ? -0.15 : 0.15
-  imgScale.value = Math.max(0.5, Math.min(10, imgScale.value + delta))
+const onImgClick = () => {
   if (imgScale.value <= 1) {
+    imgScale.value = 1.1
+  }
+}
+
+const onBlankClick = () => {
+  if (imgScale.value > 1) {
+    imgScale.value = 1
     imgOffsetX.value = 0
     imgOffsetY.value = 0
+  } else {
+    emit('close')
   }
 }
 
 const onImgMouseDown = (e) => {
-  if (!imgFullscreen.value || imgScale.value <= 1) return
+  if (imgScale.value <= 1) return
   isDragging = true
   dragStartX = e.clientX
   dragStartY = e.clientY
@@ -536,8 +583,7 @@ const initVideo = () => {
   }
 }
 
-watch(() => props.media, async () => {
-  imgFullscreen.value = false
+watch(() => props.media, async (newMedia, oldMedia) => {
   imgScale.value = 1
   imgOffsetX.value = 0
   imgOffsetY.value = 0
@@ -548,12 +594,16 @@ watch(() => props.media, async () => {
     const tweetUsernames = extractUsernames(props.media.text)
     await fetchUsernames(tweetUsernames)
     
-    fetchReplies()
+    if (!oldMedia || newMedia.tweetId !== oldMedia.tweetId) {
+      replyThreads.value = []
+      fetchReplies()
+    }
   }
 }, { immediate: true })
 
 onMounted(() => {
   preventBackgroundScroll()
+  window.addEventListener('keydown', onKeydown)
 })
 
 onUnmounted(() => {
@@ -561,6 +611,7 @@ onUnmounted(() => {
     hlsInstance.destroy()
   }
   restoreBackgroundScroll()
+  window.removeEventListener('keydown', onKeydown)
 })
 
 const onVideoError = (e) => {

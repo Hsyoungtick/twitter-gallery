@@ -27,7 +27,7 @@
     
     <router-view v-slot="{ Component }">
       <transition name="fade">
-        <component :is="Component" :media="currentMedia" :author-info="currentAuthorInfo" @close="closeModal" />
+        <component :is="Component" :media="currentMedia" :author-info="currentAuthorInfo" :tweet-media-list="currentTweetMediaList" @close="closeModal" @navigate="navigateMedia" />
       </transition>
     </router-view>
     
@@ -215,9 +215,22 @@ const currentAuthorInfo = computed(() => {
   return usersInfo.value.find(u => u.username === currentMedia.value.author)
 })
 
+const currentTweetMediaList = computed(() => {
+  if (!currentMedia.value) return []
+  return displayedMedia.value.filter(m => m.tweetId === currentMedia.value.tweetId)
+})
+
 const openModal = (media) => {
   currentMedia.value = media
   router.push({
+    name: 'modal',
+    params: { id: media.id }
+  })
+}
+
+const navigateMedia = (media) => {
+  currentMedia.value = media
+  router.replace({
     name: 'modal',
     params: { id: media.id }
   })

@@ -64,7 +64,9 @@
     "watchOnNitter": "在 Nitter 观看",
     "noReplies": "暂无回复",
     "reply": "回复",
-    "moreReplies": "更多回复"
+    "moreReplies": "更多回复",
+    "prev": "上一张",
+    "next": "下一张"
   },
   "gallery": {
     "allContentLoaded": "已加载全部内容",
