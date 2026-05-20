@@ -4,7 +4,7 @@
 
 基于 [Nitter](https://github.com/zedeus/nitter) 的一个瀑布流形式的 Twitter/X 媒体画廊浏览器
 
-中文 / [English](README.md)
+[English](README.md) / 中文
 
 ![Preview](/images/preview1.png)
 

@@ -4,7 +4,7 @@
 
 A masonry-style Twitter/X media gallery browser based on [Nitter](https://github.com/zedeus/nitter)
 
-[中文](README_zh.md) / English
+English / [中文](README_zh.md)
 
 ![Preview](/images/preview1.png)
 
