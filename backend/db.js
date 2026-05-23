@@ -3,13 +3,8 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 
-function stripImageParams(url) {
-  if (!url) return url
-  return url.replace(/(\.(jpg|jpeg|png|gif|webp|bmp|svg))(?:\?[^/]*|%3[Ff].*)$/i, '$1')
-}
-
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const DB_PATH = join(__dirname, 'data', 'gallery.db')
+const DB_PATH = join(__dirname, '..', 'data', 'gallery.db')
 const DB_DIR = dirname(DB_PATH)
 
 let db = null

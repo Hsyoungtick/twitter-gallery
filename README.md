@@ -23,108 +23,50 @@ English / [中文](README_zh.md)
 - Quick links to source URLs everywhere
 - Local caching to avoid repeated requests
 - Bilingual support (Chinese & English)
+- Auto-refresh followed users' data every hour
 
 ## 🚀 Quick Start
 
-### 1. Deploy Nitter Instance
+### Prerequisites
 
-Please refer to [Nitter Configuration](docs/nitter_config.md) to deploy the Nitter instance.
+- Deploy a [Nitter instance](docs/nitter_config.md)
 
-### 2. Clone the Project
-
-```bash
-git clone https://github.com/Hsyoungtick/twitter-gallery.git
-cd twitter-gallery
-```
-
-### 3. Configure Environment Variables
-
-Frontend:
+### Docker (Recommended)
 
 ```bash
+# 1. Create config file
 cp .env.example .env
-```
+# Edit .env, fill in your Nitter instance URL
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VITE_API_BASE` | Backend API address | `http://localhost:3000/api` |
-| `VITE_PORT` | Frontend dev/preview port | `5173` |
-
-Backend:
-
-```bash
-cp backend/.env.example backend/.env
-```
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NITTER_URL` | **Nitter instance address** | `http://127.0.0.1:8080` |
-| `PORT` | Backend server port | `3000` |
-
-### 4. Install Dependencies
-
-```bash
-# Frontend
-pnpm install
-
-# Backend
-cd backend
-pnpm install
-```
-
-### 5. Start Development Server
-
-```bash
-# From the project root, start both frontend and backend
-pnpm start
-```
-
-Or start them separately:
-
-```bash
-# Terminal 1 - Backend
-cd backend
-pnpm start
-
-# Terminal 2 - Frontend
-pnpm dev
+# 2. Start
+docker compose up -d
 ```
 
 Visit http://localhost:5173 to use the app.
 
-- Click the user icon in the top right to import followed users. Supports batch import, one username per line.
-- Click the refresh button in the top right to update followed users' media content. The more users you follow, the longer it takes due to Nitter limitations.
-- Click a user in the following list to filter and view only that user's media content.
-
-## ⚡ One-Click Start & Auto-Start (PM2)
-
-Use [PM2](https://pm2.keymetrics.io/) for production deployment with one-click start and boot auto-start.
-
-### Prerequisites
+### Manual Setup
 
 ```bash
-npm install -g pm2 pm2-windows-startup
+git clone https://github.com/Hsyoungtick/twitter-gallery.git
+cd twitter-gallery
+
+# Configure environment variables
+cp .env.example .env
+cp backend/.env.example backend/.env
+
+# Install dependencies
+pnpm install
+cd backend && pnpm install && cd ..
+
+# Start development server
+pnpm start
 ```
 
-### One-Click Start
+### PM2 Production Deployment
 
 ```bash
+npm install -g pm2
 pnpm pm2:start
-```
-
-This will automatically build the frontend and start both backend and frontend via PM2.
-
-### Boot Auto-Start
-
-```bash
-# Register PM2 as a Windows service (run as Administrator)
-pm2-startup install
-
-# Start the app
-pnpm pm2:start
-
-# Save the process list so it auto-restores on boot
-pm2 save
 ```
 
 ## 🏗️ Project Structure
@@ -132,39 +74,23 @@ pm2 save
 ```
 twitter-gallery/
 ├── backend/                # Backend service
-│   ├── data/               # SQLite database (auto-created, gitignored)
 │   ├── db.js               # Database operations
 │   ├── index.js            # Express server entry
-│   ├── .env.example        # Backend env template
 │   └── package.json
+├── data/                   # SQLite database (auto-created)
 ├── src/                    # Frontend source
 │   ├── components/         # Vue components
-│   │   ├── AddUserModal.vue
-│   │   ├── FollowingModal.vue
-│   │   ├── Header.vue
-│   │   ├── MediaGrid.vue
-│   │   ├── Modal.vue
-│   │   └── UserCard.vue
 │   ├── composables/        # Vue composables
-│   │   └── useFollowing.js
 │   ├── pages/              # Page components
-│   │   └── Gallery.vue
-│   ├── utils/              # Utility functions
-│   │   └── api.js          # API request wrapper
-│   ├── router/             # Router configuration
-│   ├── App.vue
-│   ├── main.js
-│   └── style.css
-├── .env.example            # Frontend env template
-├── .gitignore
-├── vite.config.js
-├── tailwind.config.js
+│   └── utils/              # Utility functions
+├── Dockerfile
+├── docker-compose.yml
 └── package.json
 ```
 
 ## ✨ Inspired By
 
-- Inspired by [twitter-media-gallery](https://github.com/sajjadalis/twitter-media-gallery): Use Twitter's Official API to fetch media (photos and videos) from a Twitter user's timeline or hashtag/keyword search results, then display it in a masonry layout
+- [twitter-media-gallery](https://github.com/sajjadalis/twitter-media-gallery)
 
 ## 🤖 Disclaimer
 

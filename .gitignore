@@ -29,4 +29,7 @@ dist-ssr
 *.sw?
 
 # database files
-backend/data/
+data/*.db
+
+# docker export
+*.tar

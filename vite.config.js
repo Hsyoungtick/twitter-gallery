@@ -3,8 +3,6 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const apiBase = env.VITE_API_BASE || 'http://localhost:3000/api'
-  const backendUrl = apiBase.replace(/\/api$/, '')
   const port = parseInt(env.VITE_PORT || '5173', 10)
 
   return {
@@ -13,19 +11,19 @@ export default defineConfig(({ mode }) => {
     server: {
       port,
       proxy: {
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+        },
         '/video': {
-          target: backendUrl,
+          target: 'http://localhost:3000',
           changeOrigin: true,
         },
         '/pic': {
-          target: backendUrl,
+          target: 'http://localhost:3000',
           changeOrigin: true,
         }
       }
     },
-    preview: {
-      port,
-      host: '0.0.0.0',
-    }
   }
 })

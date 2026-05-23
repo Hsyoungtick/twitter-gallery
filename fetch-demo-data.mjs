@@ -120,8 +120,8 @@ async function main() {
   console.log(`\n[demo] 评论统计: ${Object.keys(replies).length} 条推文有评论数据, 共 ${totalReplies} 条评论`)
 
   const demoData = { media, usersInfo, replies }
-  writeFileSync('data/demo-data.json', JSON.stringify(demoData, null, 2))
-  console.log(`[demo] 完成！已写入 data/demo-data.json`)
+  writeFileSync('public/demo-data.json', JSON.stringify(demoData, null, 2))
+  console.log(`[demo] 完成！已写入 public/demo-data.json`)
 }
 
 main().catch(err => {

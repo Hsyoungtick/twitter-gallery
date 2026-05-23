@@ -1,0 +1,13 @@
+**/node_modules
+dist
+.git
+.github
+.vscode
+*.md
+images/
+data/
+*.log
+.env
+.env.*
+!.env.example
+public/demo-data.json

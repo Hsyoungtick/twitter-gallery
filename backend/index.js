@@ -5,20 +5,32 @@ import * as cheerio from 'cheerio'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { config } from 'dotenv'
+import { existsSync } from 'fs'
 
 // 确保日志实时输出
 if (process.stdout._handle?.setBlocking) process.stdout._handle.setBlocking(true)
 
 import { initDB, upsertUsers, upsertUser, upsertPosts, getUsersByUsernames, getPostsByUsernames, getPostsCountByUser, deleteUser, getUser, upsertUsernameMapBatch, resolveUsernames, deletePostsByUser, cleanupNonFollowing, dbRowToUser, getFollowingList, addFollowing, addFollowingBatch, removeFollowing } from './db.js'
 
-config({ path: join(dirname(fileURLToPath(import.meta.url)), '.env') })
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+config({ path: join(__dirname, '.env') })
+config({ path: join(__dirname, '..', '.env'), override: true })
 
 const app = express()
 const PORT = process.env.PORT || 3000
 const NITTER_URL = process.env.NITTER_URL || 'http://127.0.0.1:8080'
 
-app.use(cors())
+if (process.env.NODE_ENV !== 'production') {
+  app.use(cors())
+}
 app.use(express.json())
+
+const DIST_PATH = join(__dirname, '..', 'dist')
+if (process.env.NODE_ENV === 'production' && existsSync(DIST_PATH)) {
+  app.use(express.static(DIST_PATH))
+}
 
 function stripImageParams(url) {
   if (!url) return url
@@ -645,12 +657,28 @@ app.post('/api/import-following', async (req, res) => {
   }
 })
 
+app.get('*', (req, res) => {
+  if (process.env.NODE_ENV === 'production' && existsSync(join(DIST_PATH, 'index.html'))) {
+    res.sendFile(join(DIST_PATH, 'index.html'))
+  }
+})
+
 app.listen(PORT, async () => {
   await initDB()
   const following = getFollowingList()
   cleanupNonFollowing(following)
   console.log(`Backend running on http://localhost:${PORT}`)
   console.log(`Nitter URL: ${NITTER_URL}`)
+
+  const refreshInterval = parseInt(process.env.AUTO_REFRESH_INTERVAL, 10)
+  if (refreshInterval > 0) {
+    const intervalMin = (refreshInterval / 60000).toFixed(0)
+    console.log(`[auto-refresh] 已启用，间隔 ${intervalMin} 分钟`)
+    setTimeout(() => {
+      autoRefreshAll()
+      setInterval(autoRefreshAll, refreshInterval)
+    }, 60000)
+  }
 })
 
 // ========== 辅助函数：解析nitter媒体页面 ==========
@@ -996,3 +1024,59 @@ app.post('/api/feed/refresh', async (req, res) => {
     res.end()
   }
 })
+
+async function autoRefreshAll() {
+  const following = getFollowingList()
+  if (!following.length) {
+    console.log('[auto-refresh] 关注列表为空，跳过')
+    return
+  }
+
+  const startTime = Date.now()
+  console.log(`[auto-refresh] 开始刷新 ${following.length} 个用户`)
+
+  let updatedCount = 0
+  let newPostsCount = 0
+
+  for (const username of following) {
+    try {
+      const resp = await fetchWithRetry(`${NITTER_URL}/${username}`)
+      const $ = cheerio.load(resp.data)
+      const info = parseUserPage($, username)
+
+      const cachedUser = getUser(username)
+      const dbMediaCount = getPostsCountByUser(username)
+      const recordedMediaCount = parseInt(String(cachedUser?.media_count).replace(/,/g, '') || '0')
+
+      upsertUser({ ...info, media_count: info.media_count || '0' })
+      upsertUsernameMapBatch([{ username, name: info.name }])
+
+      if (dbMediaCount === 0 || dbMediaCount !== recordedMediaCount || !cachedUser?.avatar) {
+        try {
+          const mediaResp = await fetchWithRetry(`${NITTER_URL}/${username}/media`)
+          const $$ = cheerio.load(mediaResp.data)
+          const parsed = parseMediaPage($$, username)
+          if (parsed.media.length > 0) {
+            upsertPosts(parsed.media)
+            newPostsCount += parsed.media.length
+          }
+          const count = getPostsCountByUser(username)
+          const user = getUser(username)
+          if (user) {
+            upsertUser({ ...dbRowToUser(user), media_count: String(count) })
+          }
+          updatedCount++
+        } catch (err) {
+          console.error(`[auto-refresh] ${username} 媒体获取失败: ${err.message}`)
+        }
+      }
+
+      await delay(REQUEST_DELAY)
+    } catch (err) {
+      console.error(`[auto-refresh] ${username} 失败: ${err.message}`)
+    }
+  }
+
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1)
+  console.log(`[auto-refresh] 完成，耗时 ${elapsed}s，更新 ${updatedCount}/${following.length} 个用户，新增 ${newPostsCount} 条帖子`)
+}

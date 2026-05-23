@@ -6,16 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:demo": "vite build && node -e \"require('fs').copyFileSync('data/demo-data.json','dist/demo-data.json')\"",
-    "preview": "vite preview",
-    "server": "node backend/index.js",
-    "start": "concurrently \"pnpm run server\" \"pnpm run dev\"",
+    "build:demo": "VITE_DEMO=true vite build",
+    "start": "concurrently \"node backend/index.js\" \"pnpm run dev\"",
     "pm2:start": "pnpm run build && pm2 start ecosystem.config.cjs",
-    "pm2:stop": "pm2 stop ecosystem.config.cjs",
-    "pm2:restart": "pm2 restart ecosystem.config.cjs",
-    "pm2:delete": "pm2 delete ecosystem.config.cjs",
-    "pm2:logs": "pm2 logs",
-    "pm2:startup": "pm2-startup install && pm2 save"
+    "docker:build": "docker build -t twitter-gallery:latest . && docker save twitter-gallery:latest -o twitter-gallery.tar",
+    "docker:start": "docker compose up -d"
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.23",
@@ -29,10 +24,8 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",
     "@vitejs/plugin-vue": "^6.0.6",
-    "autoprefixer": "^10.5.0",
     "concurrently": "^8.2.2",
     "postcss": "^8.5.14",
-    "puppeteer": "^25.0.4",
     "tailwindcss": "^4.3.0",
     "vite": "^8.0.12"
   }
