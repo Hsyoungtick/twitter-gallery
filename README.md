@@ -31,20 +31,15 @@ English / [中文](README_zh.md)
 
 - Deploy a [Nitter instance](docs/nitter_config.md)
 
-### Docker (Recommended)
+### Option 1: Docker (Recommended)
 
 ```bash
-# 1. Create config file
-cp .env.example .env
-# Edit .env, fill in your Nitter instance URL
-
-# 2. Start
-docker compose up -d
+docker run -d --name twitter-gallery -p 5173:5173 -v ./twitter-gallery/data:/app/data -e NITTER_URL=http://nitter:8080 --restart unless-stopped ghcr.io/hsyoungtick/twitter-gallery:latest
 ```
 
 Visit http://localhost:5173 to use the app.
 
-### Manual Setup
+### Option 2: Manual Setup
 
 ```bash
 git clone https://github.com/Hsyoungtick/twitter-gallery.git
@@ -60,13 +55,6 @@ cd backend && pnpm install && cd ..
 
 # Start development server
 pnpm start
-```
-
-### PM2 Production Deployment
-
-```bash
-npm install -g pm2
-pnpm pm2:start
 ```
 
 ## 🏗️ Project Structure

@@ -8,8 +8,6 @@
     "build": "vite build",
     "build:demo": "VITE_DEMO=true vite build",
     "start": "concurrently \"node backend/index.js\" \"pnpm run dev\"",
-    "pm2:start": "pnpm run build && pm2 start ecosystem.config.cjs",
-    "docker:build": "docker build -t twitter-gallery:latest . && docker save twitter-gallery:latest -o twitter-gallery.tar",
     "docker:start": "docker compose up -d"
   },
   "dependencies": {

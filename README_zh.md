@@ -30,20 +30,15 @@
 
 - 部署 [Nitter 实例](docs/nitter_config_zh.md)
 
-### Docker 部署（推荐）
+### 方式一：Docker 部署（推荐）
 
 ```bash
-# 1. 创建配置文件
-cp .env.example .env
-# 编辑 .env，填入你的 Nitter 实例地址
-
-# 2. 一键启动
-docker compose up -d
+docker run -d --name twitter-gallery -p 5173:5173 -v ./twitter-gallery/data:/app/data -e NITTER_URL=http://nitter:8080 --restart unless-stopped ghcr.io/hsyoungtick/twitter-gallery:latest
 ```
 
 访问 http://localhost:5173 即可使用。
 
-### 手动部署
+### 方式二：手动部署
 
 ```bash
 git clone https://github.com/Hsyoungtick/twitter-gallery.git
@@ -59,13 +54,6 @@ cd backend && pnpm install && cd ..
 
 # 启动开发服务器
 pnpm start
-```
-
-### PM2 生产部署
-
-```bash
-npm install -g pm2
-pnpm pm2:start
 ```
 
 ## 🏗️ 项目结构
