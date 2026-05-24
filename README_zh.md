@@ -33,7 +33,7 @@
 ### 方式一：Docker 部署（推荐）
 
 ```bash
-docker run -d --name twitter-gallery -p 5173:5173 -v "${PWD}/twitter-gallery/data:/app/data" -e NITTER_URL=http://nitter:8080 --restart unless-stopped ghcr.io/hsyoungtick/twitter-gallery:latest
+docker run -d --name twitter-gallery -p 5173:5173 -v "${PWD}/twitter-gallery/data:/app/data" -e NITTER_URL=http://nitter:8080 --network nitter_default --restart unless-stopped ghcr.io/hsyoungtick/twitter-gallery:latest
 ```
 
 访问 http://localhost:5173 即可使用。
