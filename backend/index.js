@@ -235,7 +235,7 @@ app.get('/api/user/:username', async (req, res) => {
     res.json({
       username,
       name,
-      avatar: avatarSrc.startsWith('http') ? avatarSrc : (avatarSrc ? `${NITTER_URL}${avatarSrc}` : ''),
+      avatar: avatarSrc || '',
       bio: $('.profile-bio').text().trim(),
       followers: $('.profile-statlist .followers .profile-stat-num').text().trim(),
     })
@@ -427,7 +427,7 @@ app.get('/api/tweet/:username/status/:tweetId', async (req, res) => {
             username: replyUsername,
             name: replyName,
             text: replyText,
-            avatar: replyAvatar.startsWith('http') ? replyAvatar : (replyAvatar ? `${NITTER_URL}${replyAvatar}` : ''),
+            avatar: replyAvatar || '',
             date: replyDate,
             dateShort: replyDateShort,
             replyingTo: finalReplyingTo,
@@ -513,7 +513,7 @@ app.get('/api/tweet/:username/status/:tweetId', async (req, res) => {
                 username: replyUsername,
                 name: replyName,
                 text: replyText,
-                avatar: replyAvatar.startsWith('http') ? replyAvatar : (replyAvatar ? `${NITTER_URL}${replyAvatar}` : ''),
+                avatar: replyAvatar || '',
                 date: replyDate,
                 dateShort: replyDateShort,
                 replyingTo: replyingToUsers,
@@ -612,7 +612,7 @@ app.post('/api/import-following', async (req, res) => {
             followingList.push({
               username: userUsername,
               name: userName || userUsername,
-              avatar: userAvatar.startsWith('http') ? userAvatar : (userAvatar ? `${NITTER_URL}${userAvatar}` : '')
+              avatar: userAvatar || ''
             })
           }
         })
@@ -751,7 +751,7 @@ function parseUserPage($, username) {
   return {
     username,
     name: $('.profile-card-fullname').text().trim() || username,
-    avatar: avatarSrc.startsWith('http') ? avatarSrc : (avatarSrc ? `${NITTER_URL}${avatarSrc}` : ''),
+    avatar: avatarSrc || '',
     bio: $('.profile-bio').text().trim(),
     followers: $('.profile-statlist .followers .profile-stat-num').text().trim(),
   }

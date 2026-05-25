@@ -2,8 +2,13 @@ import initSqlJs from 'sql.js'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
+import { config } from 'dotenv'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+config({ path: join(__dirname, '.env') })
+config({ path: join(__dirname, '..', '.env'), override: true })
+const NITTER_URL = process.env.NITTER_URL || 'http://127.0.0.1:8080'
+
 const DB_PATH = join(__dirname, '..', 'data', 'gallery.db')
 const DB_DIR = dirname(DB_PATH)
 
@@ -187,14 +192,19 @@ export function deleteUser(username) {
   scheduleSave()
 }
 
+function sanitizeUrl(url) {
+  if (!url) return url
+  return url.replace(new RegExp(`^${NITTER_URL}`, 'g'), '')
+}
+
 function dbRowToPost(row) {
   return {
     id: row.id,
     tweetId: row.tweet_id,
-    tweetUrl: row.tweet_url,
+    tweetUrl: sanitizeUrl(row.tweet_url),
     type: row.type,
-    url: row.url,
-    previewUrl: row.preview_url,
+    url: sanitizeUrl(row.url),
+    previewUrl: sanitizeUrl(row.preview_url),
     text: row.text,
     date: row.date,
     likes: row.likes,
@@ -210,7 +220,7 @@ export function dbRowToUser(row) {
   return {
     username: row.username,
     name: row.name,
-    avatar: row.avatar,
+    avatar: sanitizeUrl(row.avatar),
     bio: row.bio,
     media_count: row.media_count,
     followers: row.followers,
