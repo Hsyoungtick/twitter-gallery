@@ -14,7 +14,7 @@
           :alt="item.text"
           class="w-full h-auto object-cover"
           loading="lazy"
-          @load="onImageLoad(index)"
+          @load="onImageLoad(index); cacheImageSrc(item.previewUrl || item.url)"
         />
         <div
           v-if="item.type === 'video'"
@@ -37,8 +37,16 @@
         >
           {{ item.duration }}
         </div>
+        
+        <!-- 右上角：多图指示器 -->
+        <div
+          v-if="mediaIndexMap[index]"
+          class="absolute top-2 right-2 bg-black/60 px-1.5 py-0.5 rounded text-white text-xs"
+        >
+          {{ mediaIndexMap[index].current }}/{{ mediaIndexMap[index].total }}
+        </div>
       </div>
-      <div v-if="item.text" class="p-2 text-sm">
+      <div v-if="item.text" class="p-2 text-sm text-gray-800 dark:text-gray-200">
         {{ item.text }}
       </div>
     </div>
@@ -48,12 +56,35 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { PlayIcon, ChatBubbleLeftIcon } from '@heroicons/vue/24/solid'
+import { cacheImage } from '../utils/imageCache'
 
 const props = defineProps({
   media: Array
 })
 
 defineEmits(['open'])
+
+// 计算每个媒体项在其tweet中的位置 (current/total)
+const mediaIndexMap = computed(() => {
+  const map = {}
+  const tweetGroups = {}
+  // 按 tweetId 分组并记录每个媒体在组内的序号
+  for (let i = 0; i < (props.media || []).length; i++) {
+    const item = props.media[i]
+    const key = item.tweetId || item.id
+    if (!tweetGroups[key]) tweetGroups[key] = []
+    tweetGroups[key].push(i)
+  }
+  // 只有多图的tweet才标记
+  for (const [, indices] of Object.entries(tweetGroups)) {
+    if (indices.length > 1) {
+      indices.forEach((idx, pos) => {
+        map[idx] = { current: pos + 1, total: indices.length }
+      })
+    }
+  }
+  return map
+})
 
 const gridContainer = ref(null)
 const itemRefs = {}
@@ -83,6 +114,11 @@ const formatNumber = (num) => {
     return (n / 1000).toFixed(1) + 'K'
   }
   return num
+}
+
+// 图片加载成功后缓存
+const cacheImageSrc = (url) => {
+  cacheImage(url)
 }
 
 const layout = () => {

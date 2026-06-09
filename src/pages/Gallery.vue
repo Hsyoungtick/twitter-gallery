@@ -70,6 +70,8 @@ const refreshProgress = inject('refreshProgress')
 const filterUser = inject('filterUser')
 const handleRefreshFn = inject('handleRefresh')
 const clearFilterFn = inject('clearFilter')
+const shuffleMode = inject('shuffleMode')
+const toggleShuffleFn = inject('toggleShuffle')
 
 const galleryContainer = ref(null)
 const loadMoreTrigger = ref(null)
@@ -83,11 +85,25 @@ const showAddModal = ref(false)
 
 const PAGE_SIZE = 50
 
+// 随机排序用的缓存
+const shuffledItems = ref([])
+
+// Fisher-Yates 洗牌算法
+const shuffleArray = (array) => {
+  const arr = [...array]
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr
+}
+
 const displayedMedia = computed(() => {
   const items = filterUser.value
     ? mediaItems.value.filter(m => m.author === filterUser.value)
     : mediaItems.value
-  return items.slice(0, displayCount.value)
+  const source = shuffleMode.value ? shuffledItems.value : items
+  return source.slice(0, displayCount.value)
 })
 
 const handleSelectUser = (username) => {
@@ -200,10 +216,28 @@ const handleRefresh = async () => {
 
 handleRefreshFn.value = handleRefresh
 
+// 切换随机排序
+toggleShuffleFn.value = () => {
+  shuffleMode.value = !shuffleMode.value
+  if (shuffleMode.value) {
+    // 开启随机排序，生成打乱后的列表
+    const items = filterUser.value
+      ? mediaItems.value.filter(m => m.author === filterUser.value)
+      : mediaItems.value
+    shuffledItems.value = shuffleArray(items)
+  } else {
+    // 关闭随机排序，恢复时间排序
+    shuffledItems.value = []
+  }
+  displayCount.value = Math.min(PAGE_SIZE, displayedMedia.value.length)
+}
+
 const loadMore = () => {
-  const total = filterUser.value
-    ? mediaItems.value.filter(m => m.author === filterUser.value).length
-    : mediaItems.value.length
+  const total = shuffleMode.value
+    ? shuffledItems.value.length
+    : (filterUser.value
+      ? mediaItems.value.filter(m => m.author === filterUser.value).length
+      : mediaItems.value.length)
   if (displayCount.value < total) {
     displayCount.value = Math.min(displayCount.value + PAGE_SIZE, total)
     resetObserver()
@@ -303,7 +337,10 @@ const setupObserver = () => {
   
   observer = new IntersectionObserver(
     (entries) => {
-      if (entries[0].isIntersecting && displayCount.value < mediaItems.value.length && !loading.value) {
+      const total = shuffleMode.value
+        ? shuffledItems.value.length
+        : mediaItems.value.length
+      if (entries[0].isIntersecting && displayCount.value < total && !loading.value) {
         loadMore()
       }
     },

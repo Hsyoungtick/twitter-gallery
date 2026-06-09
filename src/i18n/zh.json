@@ -3,7 +3,9 @@
     "refreshing": "刷新中...",
     "refresh": "刷新",
     "followingList": "关注列表",
-    "filter": "筛选: @{user} (点击取消)"
+    "filter": "筛选: @{user} (点击取消)",
+    "shuffle": "随机排序",
+    "shuffleOff": "恢复时间排序"
   },
   "addUser": {
     "title": "添加关注用户",
@@ -78,7 +80,8 @@
     "importUserFailed": "导入用户信息失败"
   },
   "demo": {
-    "banner": "⚠️ 当前为演示版本，数据为静态快照，无 Nitter 后端服务，部分功能不可用"
+    "banner": "⚠️ 当前为演示版本，数据为静态快照，无 Nitter 后端服务，部分功能不可用",
+    "noBackend": "⚠️ 未连接到后端服务，当前为离线演示模式，部分功能不可用"
   },
   "lang": {
     "switch": "切换语言",

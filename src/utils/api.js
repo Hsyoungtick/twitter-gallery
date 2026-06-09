@@ -1,9 +1,16 @@
 import axios from 'axios'
+import { ref } from 'vue'
 
 const API_BASE = '/api'
 
 let demoData = null
-let demoMode = import.meta.env.VITE_DEMO === 'true'
+const envDemo = import.meta.env.VITE_DEMO === 'true'
+// 响应式demo状态
+export const demoModeRef = ref(envDemo)
+
+export function isEnvDemoMode() {
+  return envDemo
+}
 
 async function loadDemoData() {
   if (demoData) return demoData
@@ -20,24 +27,24 @@ async function loadDemoData() {
 }
 
 export function isDemoMode() {
-  return demoMode
+  return demoModeRef.value
 }
 
 async function checkBackend() {
-  if (demoMode) return false
+  if (demoModeRef.value) return false
   try {
     await axios.get(`${API_BASE}/following`, { timeout: 2000 })
     return true
   } catch {
     console.log('[demo] 后端不可用，切换到演示模式')
-    demoMode = true
+    demoModeRef.value = true
     return false
   }
 }
 
 export const nitterApi = {
   async getUser(username) {
-    if (demoMode) {
+    if (demoModeRef.value) {
       const data = await loadDemoData()
       return data?.usersInfo?.find(u => u.username === username) || { username, name: username }
     }
@@ -46,7 +53,7 @@ export const nitterApi = {
   },
 
   async getUserMedia(username, cursor = null) {
-    if (demoMode) {
+    if (demoModeRef.value) {
       const data = await loadDemoData()
       return { media: data?.media?.filter(m => m.author === username) || [] }
     }
@@ -59,7 +66,7 @@ export const nitterApi = {
   },
 
   async getFeedBatch(usernames) {
-    if (demoMode) {
+    if (demoModeRef.value) {
       const data = await loadDemoData()
       return {
         media: data?.media || [],
@@ -74,7 +81,7 @@ export const nitterApi = {
   },
 
   async refreshFeed(usernames, onProgress) {
-    if (demoMode) {
+    if (demoModeRef.value) {
       const data = await loadDemoData()
       if (onProgress) onProgress({ type: 'progress', current: 1, total: 1, message: '演示模式' })
       return {
@@ -131,7 +138,7 @@ export const nitterApi = {
   },
 
   async resolveUsernames(usernames) {
-    if (demoMode) {
+    if (demoModeRef.value) {
       const data = await loadDemoData()
       const map = {}
       for (const u of (data?.usersInfo || [])) {
@@ -146,7 +153,7 @@ export const nitterApi = {
   },
 
   async getFollowing() {
-    if (demoMode) {
+    if (demoModeRef.value) {
       const data = await loadDemoData()
       return { followingList: data?.usersInfo?.map(u => u.username) || [] }
     }
@@ -155,31 +162,31 @@ export const nitterApi = {
   },
 
   async addFollowing(username) {
-    if (demoMode) return { followingList: [] }
+    if (demoModeRef.value) return { followingList: [] }
     const response = await axios.post(`${API_BASE}/following/add`, { username })
     return response.data
   },
 
   async addFollowingBatch(usernames) {
-    if (demoMode) return { followingList: [] }
+    if (demoModeRef.value) return { followingList: [] }
     const response = await axios.post(`${API_BASE}/following/add-batch`, { usernames })
     return response.data
   },
 
   async importUser(username) {
-    if (demoMode) return { userInfo: null, media: [] }
+    if (demoModeRef.value) return { userInfo: null, media: [] }
     const response = await axios.post(`${API_BASE}/following/import-user`, { username })
     return response.data
   },
 
   async removeFollowing(username) {
-    if (demoMode) return { followingList: [] }
+    if (demoModeRef.value) return { followingList: [] }
     const response = await axios.post(`${API_BASE}/following/remove`, { username })
     return response.data
   },
 
   async getTweetReplies(author, tweetId) {
-    if (demoMode) {
+    if (demoModeRef.value) {
       const data = await loadDemoData()
       return { replyThreads: data?.replies?.[tweetId] || [] }
     }

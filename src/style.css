@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 .top-gradient {
   background: linear-gradient(90deg, #1da1f2 0%, #0d8ecf 100%);

@@ -125,7 +125,7 @@
           </div>
           
           <div class="px-4 py-3">
-            <div class="tweet-content media-body text-base whitespace-pre-wrap leading-relaxed" v-html="formatTweetContent(media.text)"></div>
+            <div class="tweet-content media-body text-base whitespace-pre-wrap leading-relaxed text-gray-900 dark:text-gray-100" v-html="formatTweetContent(media.text)"></div>
             
             <div class="mt-3 pt-3">
               <a 

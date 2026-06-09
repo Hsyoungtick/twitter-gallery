@@ -12,17 +12,19 @@
           <span v-if="refreshing && refreshProgress" class="text-xs text-blue-500 whitespace-nowrap">{{ refreshProgress.message }}</span>
           <span v-else-if="refreshing" class="text-xs text-blue-500 animate-pulse whitespace-nowrap">{{ t('header.refreshing') }}</span>
           <span v-else-if="refreshResult" class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ refreshResult }}</span>
-          <button
-            @click="handleRefresh?.()"
-            :disabled="refreshing"
-            class="p-2 rounded-lg bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 dark:hover:bg-zinc-600 transition-colors disabled:opacity-50"
-            :title="t('header.refresh')"
-          >
-            <svg class="h-5 w-5" :class="{ 'animate-spin': refreshing }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-            </svg>
-          </button>
         </template>
+        <button
+          @click="toggleShuffle?.()"
+          class="p-2 rounded-lg transition-colors"
+          :class="shuffleMode 
+            ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+            : 'bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 dark:hover:bg-zinc-600'"
+          :title="shuffleMode ? t('header.shuffleOff') : t('header.shuffle')"
+        >
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+        </button>
         <span v-if="filterUser" class="text-xs text-blue-500 font-medium whitespace-nowrap">@{{ filterUser }}</span>
         <button
           v-if="filterUser"
@@ -68,4 +70,6 @@ const refreshProgress = inject('refreshProgress')
 const filterUser = inject('filterUser')
 const handleRefresh = inject('handleRefresh')
 const clearFilter = inject('clearFilter')
+const shuffleMode = inject('shuffleMode')
+const toggleShuffle = inject('toggleShuffle')
 </script>
