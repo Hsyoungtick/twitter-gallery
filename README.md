@@ -34,6 +34,7 @@ English / [中文](README_zh.md)
 ### Option 1: Docker (Recommended)
 
 ```bash
+docker pull ghcr.io/hsyoungtick/twitter-gallery:latest
 docker run -d --name twitter-gallery -p 5173:5173 -v "${PWD}/twitter-gallery/data:/app/data" -e NITTER_URL=http://nitter:8080 --network nitter_default --restart unless-stopped ghcr.io/hsyoungtick/twitter-gallery:latest
 ```
 
