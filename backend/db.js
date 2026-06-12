@@ -164,11 +164,17 @@ export function upsertPosts(posts) {
   }
 }
 
-export function getPostsByUsernames(usernames) {
+export function getPostsByUsernames(usernames, type = null) {
   const placeholders = usernames.map(() => '?').join(',')
+  let query = `SELECT * FROM posts WHERE author IN (${placeholders})`
+  const params = [...usernames]
+  if (type) {
+    query += ` AND type = ?`
+    params.push(type)
+  }
   const results = []
-  const stmt = db.prepare(`SELECT * FROM posts WHERE author IN (${placeholders})`)
-  stmt.bind(usernames)
+  const stmt = db.prepare(query)
+  stmt.bind(params)
   while (stmt.step()) {
     const row = stmt.getAsObject()
     results.push(dbRowToPost(row))

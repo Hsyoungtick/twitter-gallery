@@ -838,11 +838,11 @@ const fetchAllUserInfo = async (usernames) => {
 // 普通加载：从数据库读取，不请求nitter
 app.post('/api/feed/batch', async (req, res) => {
   try {
-    const { usernames } = req.body
+    const { usernames, type } = req.body
     if (!usernames?.length) return res.json({ media: [], usersInfo: [], hasMore: false })
 
     const startTime = Date.now()
-    const allMedia = getPostsByUsernames(usernames)
+    const allMedia = getPostsByUsernames(usernames, type || null)
     const usersInfo = getUsersByUsernames(usernames)
 
     const parseDate = (s) => {

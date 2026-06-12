@@ -5,7 +5,9 @@
     "followingList": "Following",
     "filter": "Filter: @{user} (click to clear)",
     "shuffle": "Shuffle",
-    "shuffleOff": "Sort by time"
+    "shuffleOff": "Sort by time",
+    "videoOnly": "Videos only",
+    "showAll": "Show all"
   },
   "addUser": {
     "title": "Add Following User",

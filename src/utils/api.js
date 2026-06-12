@@ -65,18 +65,20 @@ export const nitterApi = {
     return response.data
   },
 
-  async getFeedBatch(usernames) {
+  async getFeedBatch(usernames, type = null) {
     if (demoModeRef.value) {
       const data = await loadDemoData()
+      let media = data?.media || []
+      if (type) media = media.filter(m => m.type === type)
       return {
-        media: data?.media || [],
+        media,
         usersInfo: data?.usersInfo || [],
         hasMore: false
       }
     }
-    const response = await axios.post(`${API_BASE}/feed/batch`, {
-      usernames
-    })
+    const body = { usernames }
+    if (type) body.type = type
+    const response = await axios.post(`${API_BASE}/feed/batch`, body)
     return response.data
   },
 

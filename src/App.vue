@@ -36,6 +36,8 @@ const handleRefresh = ref(null)
 const clearFilter = ref(null)
 const shuffleMode = ref(false)
 const toggleShuffle = ref(null)
+const videoOnly = ref(false)
+const toggleVideoOnly = ref(null)
 
 provide('showFollowingModal', showFollowingModal)
 provide('refreshing', refreshing)
@@ -46,6 +48,8 @@ provide('handleRefresh', handleRefresh)
 provide('clearFilter', clearFilter)
 provide('shuffleMode', shuffleMode)
 provide('toggleShuffle', toggleShuffle)
+provide('videoOnly', videoOnly)
+provide('toggleVideoOnly', toggleVideoOnly)
 
 onMounted(() => {
   // 自动检测系统深色模式

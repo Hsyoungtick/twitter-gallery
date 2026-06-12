@@ -447,10 +447,13 @@ const formatReplyDate = (dateStr) => {
   return `${result.date} ${result.time}`
 }
 
+const escapeHtml = (str) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
 const formatTweetContent = (text) => {
   if (!text) return ''
-  return text.replace(/@(\w+)/g, (match, username) => {
-    const displayName = usernameCache.value[username] || `@${username}`
+  const escaped = escapeHtml(text)
+  return escaped.replace(/@(\w+)/g, (match, username) => {
+    const displayName = escapeHtml(usernameCache.value[username] || `@${username}`)
     return `<a href="https://x.com/${username}" target="_blank" class="text-blue-500 hover:underline">${displayName}</a>`
   })
 }

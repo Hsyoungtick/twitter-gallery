@@ -5,7 +5,9 @@
     "followingList": "关注列表",
     "filter": "筛选: @{user} (点击取消)",
     "shuffle": "随机排序",
-    "shuffleOff": "恢复时间排序"
+    "shuffleOff": "恢复时间排序",
+    "videoOnly": "仅显示视频",
+    "showAll": "显示全部"
   },
   "addUser": {
     "title": "添加关注用户",

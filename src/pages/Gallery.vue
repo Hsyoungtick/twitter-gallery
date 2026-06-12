@@ -15,7 +15,7 @@
     <div ref="loadMoreTrigger" class="h-20"></div>
     
     <div 
-      v-if="displayCount >= displayedMedia.length && displayedMedia.length > 0 && !loading" 
+      v-if="displayCount >= totalItems && displayedMedia.length > 0 && !loading" 
       class="text-center py-5 text-gray-400"
     >
       {{ t('gallery.allContentLoaded') }}
@@ -72,6 +72,8 @@ const handleRefreshFn = inject('handleRefresh')
 const clearFilterFn = inject('clearFilter')
 const shuffleMode = inject('shuffleMode')
 const toggleShuffleFn = inject('toggleShuffle')
+const videoOnly = inject('videoOnly')
+const toggleVideoOnlyFn = inject('toggleVideoOnly')
 
 const galleryContainer = ref(null)
 const loadMoreTrigger = ref(null)
@@ -98,13 +100,46 @@ const shuffleArray = (array) => {
   return arr
 }
 
-const displayedMedia = computed(() => {
-  const items = filterUser.value
-    ? mediaItems.value.filter(m => m.author === filterUser.value)
-    : mediaItems.value
-  const source = shuffleMode.value ? shuffledItems.value : items
-  return source.slice(0, displayCount.value)
+// 筛选后的完整列表（未截断），做用户筛选+视频前端筛选
+const filteredMedia = computed(() => {
+  let items = mediaItems.value
+  // 视频前端筛选（即时响应，API层也会过滤用于后续同步）
+  if (videoOnly.value) {
+    items = items.filter(m => m.type === 'video')
+  }
+  if (filterUser.value) {
+    items = items.filter(m => m.author === filterUser.value)
+  }
+  return items
 })
+
+// 当前数据源（随机模式用 shuffledItems，否则用 filteredMedia）
+const currentSource = computed(() => {
+  return shuffleMode.value ? shuffledItems.value : filteredMedia.value
+})
+
+// 最终显示的媒体列表（截断）
+const displayedMedia = computed(() => {
+  return currentSource.value.slice(0, displayCount.value)
+})
+
+// 总条目数（用于判断是否还有更多）
+const totalItems = computed(() => {
+  return shuffleMode.value ? shuffledItems.value.length : filteredMedia.value.length
+})
+
+// 重新生成随机列表（基于当前 filteredMedia）
+const regenerateShuffle = () => {
+  if (shuffleMode.value) {
+    shuffledItems.value = shuffleArray(filteredMedia.value)
+  }
+}
+
+// 重置显示数量并重新生成随机列表
+const resetDisplay = () => {
+  regenerateShuffle()
+  displayCount.value = Math.min(PAGE_SIZE, totalItems.value || mediaItems.value.length)
+}
 
 const handleSelectUser = (username) => {
   if (filterUser.value === username) {
@@ -112,12 +147,12 @@ const handleSelectUser = (username) => {
   } else {
     filterUser.value = username
   }
-  displayCount.value = Math.min(PAGE_SIZE, displayedMedia.value.length || mediaItems.value.length)
+  resetDisplay()
 }
 
 clearFilterFn.value = () => {
   filterUser.value = null
-  displayCount.value = Math.min(PAGE_SIZE, mediaItems.value.length)
+  resetDisplay()
 }
 
 const loadFeed = async (isInitial = false) => {
@@ -134,8 +169,8 @@ const loadFeed = async (isInitial = false) => {
   
   try {
     const usernames = followingList.value.map(u => u.username)
-    
-    const result = await nitterApi.getFeedBatch(usernames)
+    const type = videoOnly.value ? 'video' : null
+    const result = await nitterApi.getFeedBatch(usernames, type)
     
     if (result.usersInfo) {
       usersInfo.value = result.usersInfo
@@ -199,7 +234,14 @@ const handleRefresh = async () => {
     }
     
     if (result.media) {
-      mediaItems.value = result.media
+      // 刷新后重新按当前筛选条件获取数据
+      const type = videoOnly.value ? 'video' : null
+      if (type) {
+        const filteredResult = await nitterApi.getFeedBatch(usernames, type)
+        mediaItems.value = filteredResult.media || []
+      } else {
+        mediaItems.value = result.media
+      }
       displayCount.value = Math.min(PAGE_SIZE, mediaItems.value.length)
     }
     
@@ -220,26 +262,46 @@ handleRefreshFn.value = handleRefresh
 toggleShuffleFn.value = () => {
   shuffleMode.value = !shuffleMode.value
   if (shuffleMode.value) {
-    // 开启随机排序，生成打乱后的列表
-    const items = filterUser.value
-      ? mediaItems.value.filter(m => m.author === filterUser.value)
-      : mediaItems.value
-    shuffledItems.value = shuffleArray(items)
+    shuffledItems.value = shuffleArray(filteredMedia.value)
   } else {
-    // 关闭随机排序，恢复时间排序
     shuffledItems.value = []
   }
-  displayCount.value = Math.min(PAGE_SIZE, displayedMedia.value.length)
+  displayCount.value = Math.min(PAGE_SIZE, totalItems.value)
+}
+
+// 请求版本号，用于取消过期的API响应
+let videoFilterVersion = 0
+
+// 切换仅显示视频
+toggleVideoOnlyFn.value = () => {
+  videoOnly.value = !videoOnly.value
+  // 递增版本号，使之前未返回的API响应失效
+  videoFilterVersion++
+  const currentVersion = videoFilterVersion
+  // 第一步：立即前端过滤（瞬间响应）
+  resetDisplay()
+
+  // 第二步：后台从API获取完整数据同步（不阻塞UI）
+  const type = videoOnly.value ? 'video' : null
+  if (type) {
+    const usernames = followingList.value.map(u => u.username)
+    nitterApi.getFeedBatch(usernames, type).then(result => {
+      // 版本号不匹配说明用户已切换，丢弃过期响应
+      if (currentVersion !== videoFilterVersion) return
+      if (result.media) {
+        mediaItems.value = result.media
+        resetDisplay()
+      }
+    }).catch(err => {
+      if (currentVersion !== videoFilterVersion) return
+      console.error('[video-filter]', err)
+    })
+  }
 }
 
 const loadMore = () => {
-  const total = shuffleMode.value
-    ? shuffledItems.value.length
-    : (filterUser.value
-      ? mediaItems.value.filter(m => m.author === filterUser.value).length
-      : mediaItems.value.length)
-  if (displayCount.value < total) {
-    displayCount.value = Math.min(displayCount.value + PAGE_SIZE, total)
+  if (displayCount.value < totalItems.value) {
+    displayCount.value = Math.min(displayCount.value + PAGE_SIZE, totalItems.value)
     resetObserver()
   }
 }
@@ -337,10 +399,7 @@ const setupObserver = () => {
   
   observer = new IntersectionObserver(
     (entries) => {
-      const total = shuffleMode.value
-        ? shuffledItems.value.length
-        : mediaItems.value.length
-      if (entries[0].isIntersecting && displayCount.value < total && !loading.value) {
+      if (entries[0].isIntersecting && displayCount.value < totalItems.value && !loading.value) {
         loadMore()
       }
     },
