@@ -103,9 +103,9 @@ const shuffleArray = (array) => {
 // 筛选后的完整列表（未截断），做用户筛选+视频前端筛选
 const filteredMedia = computed(() => {
   let items = mediaItems.value
-  // 视频前端筛选（即时响应，API层也会过滤用于后续同步）
+  // 视频前端筛选（即时响应，API层也会过滤用于后续同步），同时包含 GIF
   if (videoOnly.value) {
-    items = items.filter(m => m.type === 'video')
+    items = items.filter(m => m.type === 'video' || m.type === 'gif')
   }
   if (filterUser.value) {
     items = items.filter(m => m.author === filterUser.value)

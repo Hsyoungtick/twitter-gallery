@@ -169,8 +169,12 @@ export function getPostsByUsernames(usernames, type = null) {
   let query = `SELECT * FROM posts WHERE author IN (${placeholders})`
   const params = [...usernames]
   if (type) {
-    query += ` AND type = ?`
-    params.push(type)
+    if (type === 'video') {
+      query += ` AND (type = 'video' OR type = 'gif')`
+    } else {
+      query += ` AND type = ?`
+      params.push(type)
+    }
   }
   const results = []
   const stmt = db.prepare(query)

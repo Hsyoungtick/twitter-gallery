@@ -277,10 +277,10 @@ app.get('/api/user/:username/media', async (req, res) => {
         let type = 'photo'
         let duration = ''
         
-        if ($parent.hasClass('gallery-video') || $parent.hasClass('gallery-gif')) {
+        if ($parent.hasClass('gallery-video')) {
           type = 'video'
           const videoEl = $media.find('video')
-          const dataUrl = videoEl.attr('data-url') || ''
+          const dataUrl = videoEl.attr('data-url') || videoEl.attr('src') || ''
           
           if (dataUrl) {
             mediaUrl = dataUrl
@@ -290,6 +290,18 @@ app.get('/api/user/:username/media', async (req, res) => {
           previewUrl = stripImageParams(poster)
           
           duration = $parent.find('.overlay-duration').text().trim()
+        } else if ($parent.hasClass('gallery-gif')) {
+          type = 'gif'
+          const videoEl = $media.find('video')
+          let gifUrl = videoEl.attr('data-url') || videoEl.attr('src') || ''
+          
+          if (!gifUrl) {
+            const imgEl = $media.find('img')
+            gifUrl = imgEl.attr('src') || ''
+          }
+          
+          mediaUrl = stripImageParams(gifUrl)
+          previewUrl = mediaUrl
         } else {
           let imgSrc = $media.find('a img').attr('src') || $media.find('img').attr('src') || ''
           mediaUrl = stripImageParams(imgSrc)
@@ -706,17 +718,29 @@ function parseMediaPage($, username) {
       let type = 'photo'
       let duration = ''
       
-      if ($parent.hasClass('gallery-video') || $parent.hasClass('gallery-gif')) {
-        type = 'video'
-        const videoEl = $media.find('video')
-        const dataUrl = videoEl.attr('data-url') || ''
-        if (dataUrl) mediaUrl = dataUrl
-        previewUrl = stripImageParams(videoEl.attr('poster') || '')
-        duration = $parent.find('.overlay-duration').text().trim()
-      } else {
-          mediaUrl = stripImageParams($media.find('a img').attr('src') || $media.find('img').attr('src') || '')
-          previewUrl = mediaUrl
-        }
+      if ($parent.hasClass('gallery-video')) {
+      type = 'video'
+      const videoEl = $media.find('video')
+      const dataUrl = videoEl.attr('data-url') || videoEl.attr('src') || ''
+      if (dataUrl) mediaUrl = dataUrl
+      previewUrl = stripImageParams(videoEl.attr('poster') || '')
+      duration = $parent.find('.overlay-duration').text().trim()
+    } else if ($parent.hasClass('gallery-gif')) {
+      type = 'gif'
+      const videoEl = $media.find('video')
+      let gifUrl = videoEl.attr('data-url') || videoEl.attr('src') || ''
+      
+      if (!gifUrl) {
+        const imgEl = $media.find('img')
+        gifUrl = imgEl.attr('src') || ''
+      }
+      
+      mediaUrl = stripImageParams(gifUrl)
+      previewUrl = mediaUrl
+    } else {
+      mediaUrl = stripImageParams($media.find('a img').attr('src') || $media.find('img').attr('src') || '')
+      previewUrl = mediaUrl
+    }
         
         if (mediaUrl) {
           mediaItems.push({

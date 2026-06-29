@@ -22,6 +22,12 @@
         >
           <PlayIcon class="h-16 w-16 text-white opacity-70" />
         </div>
+        <div
+          v-if="item.type === 'gif'"
+          class="absolute top-2 left-2 bg-black/60 px-1.5 py-0.5 rounded text-white text-xs"
+        >
+          GIF
+        </div>
         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
         
         <!-- 左下角：评论数 -->
